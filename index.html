@@ -1,623 +1,139 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - [TU NOMBRE]</title>
+    <title>Portfolio - Alvaro Millan Estevez</title>
     
-    <!-- Font Awesome para iconos -->
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        /* Navegación */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-menu a:hover {
-            color: #667eea;
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            padding: 0 2rem;
-            animation: fadeInUp 1s ease;
-        }
-
-        .profile-img {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            margin: 0 auto 2rem;
-            object-fit: cover;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .hero .subtitle {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Contacto rápido en hero */
-        .contact-quick {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .contact-item i {
-            font-size: 1.1rem;
-        }
-
-        /* Botones */
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: white;
-            color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* Secciones */
-        .section {
-            padding: 80px 0;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding-left: 2rem;
-            padding-right: 2rem;
-        }
-
-        .section-dark {
-            background: #1a1a1a;
-            color: white;
-            margin: 0;
-            max-width: 100%;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        .section-dark .section {
-            padding-left: 2rem;
-            padding-right: 2rem;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: #667eea;
-        }
-
-        /* Sobre mí */
-        .about-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .about-img {
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .about-text h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: #667eea;
-        }
-
-        .about-text p {
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-            line-height: 1.8;
-        }
-
-        /* Skills */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .skill-item {
-            text-align: center;
-            padding: 2rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .skill-item:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .skill-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #667eea;
-        }
-
-        .skill-name {
-            font-weight: 600;
-        }
-
-        /* Proyectos */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .project-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .project-img {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-        }
-
-        .project-content {
-            padding: 2rem;
-        }
-
-        .project-title {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .project-description {
-            color: #666;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .project-tech {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tech-tag {
-            background: #f0f2f5;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #667eea;
-            font-weight: 500;
-        }
-
-        .project-links {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .project-link {
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .link-demo {
-            background: #667eea;
-            color: white;
-        }
-
-        .link-code {
-            background: transparent;
-            color: #667eea;
-            border: 1px solid #667eea;
-        }
-
-        .project-link:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Contacto */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-        }
-
-        .contact-info h3 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            color: #667eea;
-        }
-
-        .contact-item-full {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .contact-item-full:hover {
-            background: rgba(102, 126, 234, 0.2);
-            transform: translateX(10px);
-        }
-
-        .contact-icon {
-            width: 50px;
-            height: 50px;
-            background: #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .contact-text {
-            flex: 1;
-        }
-
-        .contact-text h4 {
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .contact-text p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Redes sociales */
-        .social-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .social-link {
-            width: 50px;
-            height: 50px;
-            background: #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-
-        .social-link:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Footer */
-        .footer {
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-        }
-
-        /* Animaciones */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Efectos de scroll */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .about-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-menu {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .contact-quick {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Navegación -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">[TU NOMBRE]</div>
+            <div class="logo">Alvaro Millan</div>
             <ul class="nav-menu">
-                <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#sobre-mi">Sobre mí</a></li>
-                <li><a href="#habilidades">Habilidades</a></li>
-                <li><a href="#proyectos">Proyectos</a></li>
-                <li><a href="#contacto">Contacto</a></li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="inicio" class="hero">
+    <section id="home" class="hero">
         <div class="hero-content">
-            <!-- AQUÍ AÑADE TU FOTO -->
-            <img src="[URL_DE_TU_FOTO]" alt="Tu Nombre" class="profile-img">
+            <!-- ADD YOUR PHOTO HERE -->
+            <img src="images/AlvaroMillanEstevez.jpg" alt="AlvaroMillanEstevez" class="profile-img">
             
-            <!-- AQUÍ AÑADE TU NOMBRE -->
-            <h1>[TU NOMBRE COMPLETO]</h1>
-            <p class="subtitle">Desarrollador de Aplicaciones Web</p>
+            <!-- ADD YOUR NAME HERE -->
+            <h1>Alvaro Millan Estevez</h1>
+            <p class="subtitle">Web Application Developer</p>
             
-            <!-- AQUÍ AÑADE TU DESCRIPCIÓN PERSONAL -->
+            <!-- ADD YOUR PERSONAL DESCRIPTION HERE -->
             <p class="hero-description">
-                [ESCRIBE AQUÍ UN PÁRRAFO SOBRE TI: quién eres, qué te apasiona del desarrollo web, 
-                tu experiencia o aspiraciones. Ejemplo: "Apasionado por crear experiencias web únicas 
-                y funcionales. Me especializo en tecnologías modernas y siempre busco aprender nuevas 
-                herramientas para ofrecer las mejores soluciones."]
+                Motivated and adaptable professional with diverse experience across construction, hospitality, and technology sectors. Currently graduated a Higher Degree in Web Application Development with strong technical skills and international work experience. Seeking opportunities to apply programming knowledge and multilingual abilities in a dynamic international environment.
             </p>
 
-            <!-- Contacto rápido -->
+            <!-- Quick contact -->
             <div class="contact-quick">
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
-                    <span>[tu.email@ejemplo.com]</span>
+                    <span>alvaromye@gmail.com</span>
                 </div>
                 <div class="contact-item">
                     <i class="fab fa-linkedin"></i>
-                    <span>[tu-linkedin]</span>
+                    <span><a href="//www.linkedin.com/in/alvaro-millan-estevez-27b814375">Linkedin</a></span>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-phone"></i>
-                    <span>[+34 XXX XXX XXX]</span>
+                    <span>[+34 610 017 065]</span>
                 </div>
             </div>
 
-            <!-- Botones principales -->
+            <!-- Main buttons -->
             <div class="btn-group">
-                <a href="[ENLACE_A_TU_CV.pdf]" class="btn btn-primary" download>
+                <a href="assets/CURRICULUM Álvaro Millan Estevez.pdf" class="btn btn-primary" download>
                     <i class="fas fa-download"></i>
-                    Descargar CV
+                    Download CV
                 </a>
-                <a href="#contacto" class="btn btn-secondary">
+                <a href="#contact" class="btn btn-secondary">
                     <i class="fas fa-envelope"></i>
-                    Contactar
+                    Contact Me
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Sobre mí -->
-    <section id="sobre-mi" class="section">
-        <h2 class="section-title fade-in">Sobre mí</h2>
+    <!-- About Me -->
+    <section id="about" class="section">
+        <h2 class="section-title fade-in">About Me</h2>
         <div class="about-content fade-in">
-            <!-- AQUÍ PUEDES AÑADIR OTRA FOTO MÁS PROFESIONAL -->
-            <img src="[URL_FOTO_PROFESIONAL]" alt="Sobre mí" class="about-img">
-            <div class="about-text">
-                <h3>Desarrollador Web Apasionado</h3>
-                <p>
-                    [PÁRRAFO 1: Cuéntanos sobre tu background, formación, cuándo empezaste en el desarrollo]
-                </p>
-                <p>
-                    [PÁRRAFO 2: Habla sobre tus tecnologías favoritas, metodologías de trabajo, 
-                    lo que más te gusta del desarrollo web]
-                </p>
-                <p>
-                    [PÁRRAFO 3: Menciona tus objetivos profesionales, qué tipo de proyectos 
-                    te interesan, tu visión del futuro en tech]
-                </p>
+            <h3>Passionate Web Developer</h3>
+            
+            <div class="paragraphs-container">
+                <!-- Expandable Paragraph 1: Background & Education -->
+                <div class="expandable-paragraph">
+                    <div class="paragraph-header" onclick="toggleParagraph(this)">
+                        <span><i class="fas fa-graduation-cap"></i> Background & Education</span>
+                        <i class="fas fa-chevron-down paragraph-icon"></i>
+                    </div>
+                    <div class="preview-text">
+                        Click to learn about my educational foundation and early experience...
+                    </div>
+                    <div class="paragraph-content">
+                        <p>
+                            Completed a Higher Vocational Training degree in Web Application Development and gained practical experience working as a freelance developer. I've created custom applications for various businesses, developing strong problem-solving skills and a deep understanding of client requirements and project delivery.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Expandable Paragraph 2: Technical Skills -->
+                <div class="expandable-paragraph">
+                    <div class="paragraph-header" onclick="toggleParagraph(this)">
+                        <span><i class="fas fa-code"></i> Technical Expertise</span>
+                        <i class="fas fa-chevron-down paragraph-icon"></i>
+                    </div>
+                    <div class="preview-text">
+                        Discover my full-stack development skills and preferred technologies...
+                    </div>
+                    <div class="paragraph-content">
+                        <p>
+                            I specialize in full-stack development using Laravel for backend, Vue.js for dynamic interfaces, and MySQL for database management. My toolkit includes PHP, JavaScript, HTML5, CSS3, Docker Compose, and Git. I focus on creating scalable solutions and enjoy transforming clean, efficient code into user-friendly applications.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Expandable Paragraph 3: Career Goals -->
+                <div class="expandable-paragraph">
+                    <div class="paragraph-header" onclick="toggleParagraph(this)">
+                        <span><i class="fas fa-rocket"></i> Career Goals & Vision</span>
+                        <i class="fas fa-chevron-down paragraph-icon"></i>
+                    </div>
+                    <div class="preview-text">
+                        Learn about my professional aspirations and ideal work environment...
+                    </div>
+                    <div class="paragraph-content">
+                        <p>
+                            I'm seeking opportunities with forward-thinking companies that offer growth potential, financial stability, and remote work flexibility. My goal is to contribute to innovative projects that make a meaningful impact while continuously expanding my technical expertise in the evolving world of web development.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Habilidades -->
+    <!-- Skills -->
     <div class="section-dark">
-        <section id="habilidades" class="section">
-            <h2 class="section-title fade-in">Habilidades Técnicas</h2>
+        <section id="skills" class="section">
+            <h2 class="section-title fade-in">Technical Skills</h2>
             <div class="skills-grid fade-in">
                 <!-- Frontend -->
                 <div class="skill-item">
@@ -633,119 +149,119 @@
                     <div class="skill-name">JavaScript</div>
                 </div>
                 <div class="skill-item">
-                    <i class="fab fa-react skill-icon"></i>
-                    <div class="skill-name">React</div>
-                </div>
-                <div class="skill-item">
-                    <i class="fab fa-vue skill-icon"></i>
+                    <i class="fab fa-vuejs skill-icon"></i>
                     <div class="skill-name">Vue.js</div>
                 </div>
-                
-                <!-- Backend -->
                 <div class="skill-item">
-                    <i class="fab fa-node-js skill-icon"></i>
-                    <div class="skill-name">Node.js</div>
+                    <i class="fab fa-laravel skill-icon"></i>
+                    <div class="skill-name">Laravel</div>
                 </div>
+                
+                <!-- Backend & Database -->
                 <div class="skill-item">
-                    <i class="fab fa-python skill-icon"></i>
-                    <div class="skill-name">Python</div>
+                    <i class="fab fa-php skill-icon"></i>
+                    <div class="skill-name">PHP</div>
                 </div>
                 <div class="skill-item">
                     <i class="fas fa-database skill-icon"></i>
-                    <div class="skill-name">MongoDB</div>
+                    <div class="skill-name">MySQL</div>
+                </div>
+                <div class="skill-item">
+                    <i class="fab fa-docker skill-icon"></i>
+                    <div class="skill-name">Docker</div>
                 </div>
                 
-                <!-- Herramientas -->
+                <!-- Tools -->
                 <div class="skill-item">
                     <i class="fab fa-github skill-icon"></i>
                     <div class="skill-name">GitHub</div>
                 </div>
                 <div class="skill-item">
-                    <i class="fab fa-figma skill-icon"></i>
-                    <div class="skill-name">Figma</div>
+                    <i class="fas fa-code-branch skill-icon"></i>
+                    <div class="skill-name">Git</div>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- Proyectos -->
-    <section id="proyectos" class="section">
-        <h2 class="section-title fade-in">Mis Proyectos</h2>
+    <!-- Projects -->
+    <section id="projects" class="section">
+        <h2 class="section-title fade-in">My Projects</h2>
         <div class="projects-grid fade-in">
-            <!-- Proyecto 1 -->
+            <!-- Project 1 -->
             <div class="project-card">
                 <div class="project-img">
                     <i class="fas fa-code"></i>
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">[NOMBRE DEL PROYECTO 1]</h3>
+                    <h3 class="project-title">[PROJECT NAME 1]</h3>
                     <p class="project-description">
-                        [DESCRIPCIÓN: Qué hace el proyecto, qué problema resuelve, 
-                        características principales]
+                        [DESCRIPTION: What the project does, what problem it solves, 
+                        main features]
                     </p>
                     <div class="project-tech">
-                        <span class="tech-tag">React</span>
-                        <span class="tech-tag">Node.js</span>
-                        <span class="tech-tag">MongoDB</span>
+                        <span class="tech-tag">Laravel</span>
+                        <span class="tech-tag">Vue.js</span>
+                        <span class="tech-tag">MySQL</span>
                     </div>
                     <div class="project-links">
-                        <a href="[ENLACE_DEMO]" class="project-link link-demo">
+                        <a href="[DEMO_LINK]" class="project-link link-demo">
                             <i class="fas fa-external-link-alt"></i> Demo
                         </a>
-                        <a href="[ENLACE_GITHUB]" class="project-link link-code">
-                            <i class="fab fa-github"></i> Código
+                        <a href="[GITHUB_LINK]" class="project-link link-code">
+                            <i class="fab fa-github"></i> Code
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Proyecto 2 -->
+            <!-- Project 2 -->
             <div class="project-card">
                 <div class="project-img">
                     <i class="fas fa-mobile-alt"></i>
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">[NOMBRE DEL PROYECTO 2]</h3>
+                    <h3 class="project-title">[PROJECT NAME 2]</h3>
                     <p class="project-description">
-                        [DESCRIPCIÓN DEL SEGUNDO PROYECTO]
+                        [DESCRIPTION OF THE SECOND PROJECT]
                     </p>
                     <div class="project-tech">
                         <span class="tech-tag">Vue.js</span>
-                        <span class="tech-tag">Firebase</span>
-                        <span class="tech-tag">CSS3</span>
+                        <span class="tech-tag">PHP</span>
+                        <span class="tech-tag">Docker</span>
                     </div>
                     <div class="project-links">
-                        <a href="[ENLACE_DEMO]" class="project-link link-demo">
+                        <a href="[DEMO_LINK]" class="project-link link-demo">
                             <i class="fas fa-external-link-alt"></i> Demo
                         </a>
-                        <a href="[ENLACE_GITHUB]" class="project-link link-code">
-                            <i class="fab fa-github"></i> Código
+                        <a href="[GITHUB_LINK]" class="project-link link-code">
+                            <i class="fab fa-github"></i> Code
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Proyecto 3 -->
+            <!-- Project 3 -->
             <div class="project-card">
                 <div class="project-img">
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">[NOMBRE DEL PROYECTO 3]</h3>
+                    <h3 class="project-title">[PROJECT NAME 3]</h3>
                     <p class="project-description">
-                        [DESCRIPCIÓN DEL TERCER PROYECTO]
+                        [DESCRIPTION OF THE THIRD PROJECT]
                     </p>
                     <div class="project-tech">
                         <span class="tech-tag">JavaScript</span>
-                        <span class="tech-tag">D3.js</span>
-                        <span class="tech-tag">API REST</span>
+                        <span class="tech-tag">Laravel</span>
+                        <span class="tech-tag">REST API</span>
                     </div>
                     <div class="project-links">
-                        <a href="[ENLACE_DEMO]" class="project-link link-demo">
+                        <a href="[DEMO_LINK]" class="project-link link-demo">
                             <i class="fas fa-external-link-alt"></i> Demo
                         </a>
-                        <a href="[ENLACE_GITHUB]" class="project-link link-code">
-                            <i class="fab fa-github"></i> Código
+                        <a href="[GITHUB_LINK]" class="project-link link-code">
+                            <i class="fab fa-github"></i> Code
                         </a>
                     </div>
                 </div>
@@ -753,16 +269,16 @@
         </div>
     </section>
 
-    <!-- Contacto -->
+    <!-- Contact -->
     <div class="section-dark">
-        <section id="contacto" class="section">
-            <h2 class="section-title fade-in">Contacto</h2>
+        <section id="contact" class="section">
+            <h2 class="section-title fade-in">Contact</h2>
             <div class="contact-grid fade-in">
                 <div class="contact-info">
-                    <h3>¡Hablemos!</h3>
+                    <h3>Let's Talk!</h3>
                     <p style="margin-bottom: 2rem; color: #ccc;">
-                        ¿Tienes un proyecto en mente? ¿Quieres colaborar? 
-                        No dudes en contactarme. Estaré encantado de escucharte.
+                        Do you have a project in mind? Want to collaborate? 
+                        Don't hesitate to contact me. I'd be happy to hear from you.
                     </p>
 
                     <!-- Email -->
@@ -772,18 +288,18 @@
                         </div>
                         <div class="contact-text">
                             <h4>Email</h4>
-                            <p>[tu.email@ejemplo.com]</p>
+                            <p>alvaromye@gmail.com</p>
                         </div>
                     </div>
 
-                    <!-- Teléfono -->
+                    <!-- Phone -->
                     <div class="contact-item-full">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
                         <div class="contact-text">
-                            <h4>Teléfono</h4>
-                            <p>[+34 XXX XXX XXX]</p>
+                            <h4>Phone</h4>
+                            <p>+34 610 017 065</p>
                         </div>
                     </div>
 
@@ -794,68 +310,56 @@
                         </div>
                         <div class="contact-text">
                             <h4>LinkedIn</h4>
-                            <p>[linkedin.com/in/tu-perfil]</p>
+                            <p>linkedin.com/in/alvaro-millan-estevez-27b814375</p>
                         </div>
                     </div>
 
-                    <!-- Ubicación -->
+                    <!-- Location -->
                     <div class="contact-item-full">
                         <div class="contact-icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div class="contact-text">
-                            <h4>Ubicación</h4>
-                            <p>[Tu Ciudad, País]</p>
+                            <h4>Location</h4>
+                            <p>Camuñas, Castilla-La Mancha, Spain</p>
                         </div>
                     </div>
 
-                    <!-- Redes sociales -->
+                    <!-- Social media -->
                     <div class="social-links">
-                        <a href="[ENLACE_GITHUB]" class="social-link">
+                        <a href="[GITHUB_LINK]" class="social-link">
                             <i class="fab fa-github"></i>
                         </a>
-                        <a href="[ENLACE_LINKEDIN]" class="social-link">
+                        <a href="//www.linkedin.com/in/alvaro-millan-estevez-27b814375" class="social-link">
                             <i class="fab fa-linkedin"></i>
                         </a>
-                        <a href="[ENLACE_TWITTER]" class="social-link">
+                        <a href="[TWITTER_LINK]" class="social-link">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="[ENLACE_INSTAGRAM]" class="social-link">
+                        <a href="[INSTAGRAM_LINK]" class="social-link">
                             <i class="fab fa-instagram"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Formulario de contacto -->
+                <!-- Contact form -->
                 <div class="contact-form">
-                    <form action="[AQUÍ_PONDRAS_TU_SERVICIO_DE_FORMULARIOS]" method="POST">
-                        <div class="form-group" style="margin-bottom: 1.5rem;">
-                            <input type="text" name="name" placeholder="Tu nombre" required 
-                                   style="width: 100%; padding: 1rem; border: none; border-radius: 10px; 
-                                          background: rgba(255,255,255,0.1); color: white; font-size: 1rem;
-                                          border: 1px solid rgba(255,255,255,0.2);">
+                    <form action="[HERE_YOU_WILL_PUT_YOUR_FORM_SERVICE]" method="POST">
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="Your name" required>
                         </div>
-                        <div class="form-group" style="margin-bottom: 1.5rem;">
-                            <input type="email" name="email" placeholder="Tu email" required
-                                   style="width: 100%; padding: 1rem; border: none; border-radius: 10px; 
-                                          background: rgba(255,255,255,0.1); color: white; font-size: 1rem;
-                                          border: 1px solid rgba(255,255,255,0.2);">
+                        <div class="form-group">
+                            <input type="email" name="email" placeholder="Your email" required>
                         </div>
-                        <div class="form-group" style="margin-bottom: 1.5rem;">
-                            <input type="text" name="subject" placeholder="Asunto" required
-                                   style="width: 100%; padding: 1rem; border: none; border-radius: 10px; 
-                                          background: rgba(255,255,255,0.1); color: white; font-size: 1rem;
-                                          border: 1px solid rgba(255,255,255,0.2);">
+                        <div class="form-group">
+                            <input type="text" name="subject" placeholder="Subject" required>
                         </div>
-                        <div class="form-group" style="margin-bottom: 2rem;">
-                            <textarea name="message" placeholder="Tu mensaje" rows="5" required
-                                      style="width: 100%; padding: 1rem; border: none; border-radius: 10px; 
-                                             background: rgba(255,255,255,0.1); color: white; font-size: 1rem;
-                                             border: 1px solid rgba(255,255,255,0.2); resize: vertical;"></textarea>
+                        <div class="form-group">
+                            <textarea name="message" placeholder="Your message" rows="5" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-paper-plane"></i>
-                            Enviar Mensaje
+                            Send Message
                         </button>
                     </form>
                 </div>
@@ -865,196 +369,11 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2025 [TU NOMBRE]. Todos los derechos reservados.</p>
-        <p>Hecho con ❤️ y mucho código</p>
+        <p>&copy; 2025 Alvaro Millan Estevez. All rights reserved.</p>
+        <p>Made with ❤️ and lots of code</p>
     </footer>
 
-    <script>
-        // Smooth scrolling para navegación
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Navbar background change on scroll
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 100) {
-                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-            } else {
-                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-                navbar.style.boxShadow = 'none';
-            }
-        });
-
-        // Animaciones de scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        // Observar todos los elementos con clase fade-in
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Efecto typewriter para el título (opcional)
-        function typeWriter(element, text, speed = 100) {
-            let i = 0;
-            element.innerHTML = '';
-            
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                }
-            }
-            type();
-        }
-
-        // Activar efecto typewriter en el nombre (opcional - comenta/descomenta según prefieras)
-        // window.addEventListener('load', function() {
-        //     const heroTitle = document.querySelector('.hero h1');
-        //     const originalText = heroTitle.textContent;
-        //     typeWriter(heroTitle, originalText, 100);
-        // });
-
-        // Contador animado para skills (opcional)
-        function animateSkills() {
-            const skillItems = document.querySelectorAll('.skill-item');
-            skillItems.forEach((item, index) => {
-                setTimeout(() => {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(30px)';
-                    item.style.transition = 'all 0.6s ease';
-                    
-                    setTimeout(() => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateY(0)';
-                    }, 100);
-                }, index * 100);
-            });
-        }
-
-        // Particle effect para el hero (opcional - efecto visual avanzado)
-        function createParticles() {
-            const hero = document.querySelector('.hero');
-            const particlesContainer = document.createElement('div');
-            particlesContainer.style.position = 'absolute';
-            particlesContainer.style.top = '0';
-            particlesContainer.style.left = '0';
-            particlesContainer.style.width = '100%';
-            particlesContainer.style.height = '100%';
-            particlesContainer.style.pointerEvents = 'none';
-            particlesContainer.style.zIndex = '1';
-            
-            hero.appendChild(particlesContainer);
-            hero.querySelector('.hero-content').style.position = 'relative';
-            hero.querySelector('.hero-content').style.zIndex = '2';
-
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.style.position = 'absolute';
-                particle.style.width = '2px';
-                particle.style.height = '2px';
-                particle.style.background = 'rgba(255, 255, 255, 0.5)';
-                particle.style.borderRadius = '50%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animation = `float ${3 + Math.random() * 4}s ease-in-out infinite`;
-                particle.style.animationDelay = Math.random() * 2 + 's';
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Activar efectos cuando la página carga
-        window.addEventListener('load', function() {
-            // Activar animación de skills cuando se hace scroll a esa sección
-            const skillsSection = document.querySelector('#habilidades');
-            const skillsObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        animateSkills();
-                        skillsObserver.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.5 });
-            
-            skillsObserver.observe(skillsSection);
-            
-            // Crear partículas (descomenta si quieres este efecto)
-            // createParticles();
-        });
-
-        // Efecto hover para project cards
-        document.querySelectorAll('.project-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-15px) scale(1.02)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-
-        // Validación simple del formulario
-        const contactForm = document.querySelector('form');
-        if (contactForm) {
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Aquí puedes agregar tu lógica de envío
-                // Por ejemplo, usar Formspree, Netlify Forms, o tu propio backend
-                
-                alert('¡Gracias por tu mensaje! Te responderé pronto.');
-                
-                // Reset form
-                this.reset();
-            });
-        }
-
-        // Efecto de carga para las imágenes
-        document.querySelectorAll('img').forEach(img => {
-            img.addEventListener('load', function() {
-                this.style.opacity = '0';
-                this.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
-                    this.style.opacity = '1';
-                }, 100);
-            });
-        });
-
-        // Console message para recruiters/desarrolladores curiosos
-        console.log(`
-        🚀 ¡Hola! Veo que eres curioso/a con el código
-        
-        Si estás viendo esto, probablemente seas un/a reclutador/a
-        o desarrollador/a revisando mi trabajo.
-        
-        ¡Me encanta conocer gente así! 
-        No dudes en contactarme: [tu.email@ejemplo.com]
-        
-        Hecho con ❤️ y JavaScript puro
-        `);
-    </script>
+    <!-- Custom JavaScript -->
+    <script src="js/main.js"></script>
 </body>
 </html>
