@@ -85,8 +85,8 @@ const App = () => {
       tech: ["Vue.js", "TypeScript", "Laravel", "MySQL"],
       demo: "https://tu-demo-link.vercel.app", // Cambia por tu link real
       code: "https://github.com/AlvaroMillanEstevez/VueShop-Admin",
-      image: "/assets/admin-panel-screenshot.png", // Añade tu screenshot aquí
-      status: "active" // Proyecto activo
+      image: "/assets/e-commerceAdminPanel.png",
+      status: "active"
     },
     {
       title: "Task Management System",
