@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Download, Mail, Phone, MapPin, ExternalLink, Github, Linkedin, Menu, X } from 'lucide-react';
+import { ChevronDown, Download, Mail, Phone, MapPin, ExternalLink, Github, Linkedin, Menu, X, Play } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [selectedVideoProject, setSelectedVideoProject] = useState(null);
 
   // Smooth scroll function
   const scrollToSection = (sectionId) => {
@@ -12,6 +13,11 @@ const App = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMenuOpen(false);
+  };
+
+  // Close video modal
+  const closeVideoModal = () => {
+    setSelectedVideoProject(null);
   };
 
   // Navbar background change on scroll
@@ -83,9 +89,9 @@ const App = () => {
       title: "E-commerce Admin Panel",
       description: "Complete administrative dashboard for online store management. Features include order tracking, inventory management, customer analytics, and real-time stock control with comprehensive reporting.",
       tech: ["Vue.js", "TypeScript", "Laravel", "MySQL"],
-      demo: "https://tu-demo-link.vercel.app", // Cambia por tu link real
       code: "https://github.com/AlvaroMillanEstevez/VueShop-Admin",
-      image: "/assets/e-commerceAdminPanel.png",
+      image: "./assets/EcommerceAdminPanel.png",
+      video: "./assets/videos/videoDemoEcommerceAdminPanel.mp4",
       status: "active"
     },
     {
@@ -187,7 +193,7 @@ const App = () => {
           {/* Profile Image */}
           <div className="mb-8 relative">
             <img
-              src="/assets/AlvaroMillanEstevez2.jpg"
+              src="/assets/AlvaroMillanEstevez2.jpg" // ✅ MANTENER: Con barra inicial
               alt="Alvaro Millan Estevez"
               className="w-48 h-48 sm:w-56 sm:h-56 mx-auto rounded-full border-4 border-white/30 object-cover shadow-2xl"
             />
@@ -224,7 +230,7 @@ const App = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp delay-500">
             <a
-              href="/assets/CURRICULUM Álvaro Millan Estevez.pdf"
+              href="/assets/CURRICULUM Álvaro Millan Estevez.pdf" // ✅ MANTENER: Con barra inicial
               download="CURRICULUM Álvaro Millan Estevez.pdf"
               className="bg-white/20 hover:bg-white hover:text-blue-600 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-white/30"
             >
@@ -339,13 +345,28 @@ const App = () => {
                 className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl"
               >
                 {/* Project Image */}
-                <div className="h-48 relative overflow-hidden">
+                <div className="h-48 relative overflow-hidden group">
                   {project.image ? (
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      
+                      {/* Video Overlay */}
+                      {project.video && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button
+                            onClick={() => setSelectedVideoProject(project)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors transform hover:scale-105"
+                          >
+                            <Play size={20} />
+                            <span>Watch Demo</span>
+                          </button>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                       {project.status === 'coming-soon' ? (
@@ -391,15 +412,27 @@ const App = () => {
                   <div className="flex gap-3">
                     {project.status === 'active' ? (
                       <>
-                        <a
-                          href={project.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 font-medium text-sm"
-                        >
-                          <ExternalLink size={14} />
-                          Live Demo
-                        </a>
+                        {/* Botón de Video Demo o Demo Link */}
+                        {project.video ? (
+                          <button
+                            onClick={() => setSelectedVideoProject(project)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 font-medium text-sm"
+                          >
+                            <Play size={14} />
+                            Video Demo
+                          </button>
+                        ) : project.demo ? (
+                          <a
+                            href={project.demo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 font-medium text-sm"
+                          >
+                            <ExternalLink size={14} />
+                            Live Demo
+                          </a>
+                        ) : null}
+                        
                         <a
                           href={project.code}
                           target="_blank"
@@ -422,6 +455,66 @@ const App = () => {
           </div>
         </div>
       </section>
+
+      {/* Video Modal */}
+      {selectedVideoProject && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
+          onClick={closeVideoModal}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {selectedVideoProject.title} - Demo
+              </h3>
+              <button
+                onClick={closeVideoModal}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            {/* Video Container */}
+            <div className="p-4">
+              <video
+                controls
+                autoPlay
+                className="w-full h-auto max-h-[70vh]"
+                poster={selectedVideoProject.image}
+              >
+                <source src={selectedVideoProject.video} type="video/mp4" />
+                Tu navegador no soporta el elemento video.
+              </video>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  <strong>Tecnologías:</strong> {selectedVideoProject.tech.join(', ')}
+                </p>
+                <p className="text-sm text-gray-700">
+                  {selectedVideoProject.description}
+                </p>
+              </div>
+              <a
+                href={selectedVideoProject.code}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 px-4 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Github size={16} />
+                Ver en GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-gray-900 text-white">
