@@ -1,10 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Download, Mail, Phone, MapPin, ExternalLink, Github, Linkedin, Menu, X, Play } from 'lucide-react';
+import { ChevronDown, Download, Mail, Phone, MapPin, ExternalLink, Github, Linkedin, Menu, X, Play, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
+  
+  // Contact form states
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
+
+  // EmailJS configuration
+  const EMAILJS_CONFIG = {
+    SERVICE_ID: 'service_m76pgsx',
+    TEMPLATE_ID: 'template_esnwq3k',
+    PUBLIC_KEY: 'LjP58GRwq1uTxmjuJ'
+  };
+
+  // Load EmailJS script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+    script.async = true;
+    script.onload = () => {
+      if (window.emailjs) {
+        window.emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
 
   // Smooth scroll function
   const scrollToSection = (sectionId) => {
@@ -18,6 +52,62 @@ const App = () => {
   // Close video modal
   const closeVideoModal = () => {
     setSelectedVideoProject(null);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle form submission with EmailJS
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(null), 5000);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Send email using EmailJS
+      if (window.emailjs) {
+        const result = await window.emailjs.send(
+          EMAILJS_CONFIG.SERVICE_ID,
+          EMAILJS_CONFIG.TEMPLATE_ID,
+          {
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message
+          }
+        );
+
+        if (result.status === 200) {
+          setSubmitStatus('success');
+          setFormData({ name: '', email: '', subject: '', message: '' });
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } else {
+        throw new Error('EmailJS not loaded');
+      }
+      
+      setTimeout(() => setSubmitStatus(null), 5000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(null), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Navbar background change on scroll
@@ -193,7 +283,7 @@ const App = () => {
           {/* Profile Image */}
           <div className="mb-8 relative">
             <img
-              src="/assets/AlvaroMillanEstevez2.jpg" // ✅ MANTENER: Con barra inicial
+              src="/assets/AlvaroMillanEstevez2.jpg"
               alt="Alvaro Millan Estevez"
               className="w-48 h-48 sm:w-56 sm:h-56 mx-auto rounded-full border-4 border-white/30 object-cover shadow-2xl"
             />
@@ -230,7 +320,7 @@ const App = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp delay-500">
             <a
-              href="/assets/CURRICULUM Álvaro Millan Estevez.pdf" // ✅ MANTENER: Con barra inicial
+              href="/assets/CURRICULUM Álvaro Millan Estevez.pdf"
               download="CURRICULUM Álvaro Millan Estevez.pdf"
               className="bg-white/20 hover:bg-white hover:text-blue-600 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-white/30"
             >
@@ -282,8 +372,7 @@ const App = () => {
                     </div>
                     <ChevronDown
                       size={20}
-                      className={`transition-transform duration-300 ${expandedSection === section.id ? 'rotate-180' : ''
-                        }`}
+                      className={`transition-transform duration-300 ${expandedSection === section.id ? 'rotate-180' : ''}`}
                     />
                   </div>
 
@@ -488,7 +577,7 @@ const App = () => {
                 poster={selectedVideoProject.image}
               >
                 <source src={selectedVideoProject.video} type="video/mp4" />
-                Tu navegador no soporta el elemento video.
+                Your browser does not support the video element.
               </video>
             </div>
             
@@ -496,7 +585,7 @@ const App = () => {
             <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <p className="text-sm text-gray-600 mb-2">
-                  <strong>Tecnologías:</strong> {selectedVideoProject.tech.join(', ')}
+                  <strong>Technologies:</strong> {selectedVideoProject.tech.join(', ')}
                 </p>
                 <p className="text-sm text-gray-700">
                   {selectedVideoProject.description}
@@ -569,44 +658,100 @@ const App = () => {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 sm:p-8">
-              <div className="space-y-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 sm:p-8 relative">
+              {/* Success/Error Messages */}
+              {submitStatus && (
+                <div className={`absolute top-4 left-4 right-4 p-4 rounded-lg flex items-center gap-3 z-10 ${
+                  submitStatus === 'success' 
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-300' 
+                    : 'bg-red-500/20 border border-red-500/30 text-red-300'
+                }`}>
+                  {submitStatus === 'success' ? (
+                    <>
+                      <CheckCircle size={20} />
+                      <span>Message sent successfully! I'll get back to you soon.</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={20} />
+                      <span>Error sending message. Please check the fields and try again.</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <input
                     type="text"
-                    placeholder="Your name"
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your name *"
+                    required
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
                   />
                 </div>
                 <div>
                   <input
                     type="email"
-                    placeholder="Your email"
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Your email *"
+                    required
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
                   />
                 </div>
                 <div>
                   <input
                     type="text"
-                    placeholder="Subject"
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    placeholder="Subject *"
+                    required
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
                   />
                 </div>
                 <div>
                   <textarea
-                    placeholder="Your message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Your message *"
                     rows={5}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors duration-200 resize-vertical"
+                    required
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200 resize-vertical"
                   />
                 </div>
                 <button
-                  type="button"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
-                  onClick={() => alert('Message sent! (Here you would connect with your email service)')}
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-4 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? 'bg-gray-600 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 transform hover:-translate-y-1'
+                  } text-white`}
                 >
-                  <Mail size={20} />
-                  Send Message
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={20} />
+                      Send Message
+                    </>
+                  )}
                 </button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-gray-400 text-sm">
+                  Fields marked with * are required
+                </p>
               </div>
             </div>
           </div>
