@@ -18,7 +18,7 @@ const App = () => {
 
   // EmailJS configuration
   const EMAILJS_CONFIG = {
-    SERVICE_ID: 'service_m76pgsx',
+    SERVICE_ID: 'service_84vh1wt',
     TEMPLATE_ID: 'template_esnwq3k',
     PUBLIC_KEY: 'LjP58GRwq1uTxmjuJ'
   };
