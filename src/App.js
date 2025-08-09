@@ -30,7 +30,7 @@ const App = () => {
     script.async = true;
     script.onload = () => {
       if (window.emailjs) {
-        window.emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+        window.emailjs.init('LjP58GRwq1uTxmjuJ');
       }
     };
     document.head.appendChild(script);
@@ -38,7 +38,7 @@ const App = () => {
     return () => {
       document.head.removeChild(script);
     };
-  }, []);
+  }, []); // Empty dependency array is fine since we're using the key directly
 
   // Smooth scroll function
   const scrollToSection = (sectionId) => {
