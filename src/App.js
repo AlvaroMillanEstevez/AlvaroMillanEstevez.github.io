@@ -320,8 +320,8 @@ const App = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp delay-500">
             <a
-              href="/assets/CURRICULUM Álvaro Millan Estevez.pdf"
-              download="CURRICULUM Álvaro Millan Estevez.pdf"
+              href="/assets/CV_Alvaro_Millan_Estevez_FullStack.pdf"
+              download="CV_Alvaro_Millan_Estevez_FullStack.pdf"
               className="bg-white/20 hover:bg-white hover:text-blue-600 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-white/30"
             >
               <Download size={20} />
