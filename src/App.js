@@ -180,8 +180,8 @@ const App = () => {
       description: "Complete administrative dashboard for online store management. Features include order tracking, inventory management, customer analytics, and real-time stock control with comprehensive reporting.",
       tech: ["Vue.js", "TypeScript", "Laravel", "MySQL"],
       code: "https://github.com/AlvaroMillanEstevez/VueShop-Admin",
-      image: "./assets/EcommerceAdminPanel.png",
-      video: "./assets/videos/videoDemoEcommerceAdminPanel.mp4",
+      image: "assets/EcommerceAdminPanel.png",
+      video: "assets/videos/videoDemoEcommerceAdminPanel.mp4",
       status: "active"
     },
     {
@@ -189,8 +189,8 @@ const App = () => {
       description: "Advanced project management platform with real-time collaboration, task assignment, and progress tracking. Built for team productivity and workflow optimization.",
       tech: ["Vue.js", "JavaScript", "Laravel","MySQL", "Docker"],
       code: "https://github.com/AlvaroMillanEstevez/Task-Management-System",
-      image: ".assets/TaskManagerDashboard.png",
-      vide: ".assets/videos/videoDemoTaskManager.mp4",
+      image: "assets/TaskManagerDashboard.png",
+      video: "assets/videos/videoDemoTaskManager.mp4",
       status: "active"
     },
     {
