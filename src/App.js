@@ -187,11 +187,11 @@ const App = () => {
     {
       title: "Task Management System",
       description: "Advanced project management platform with real-time collaboration, task assignment, and progress tracking. Built for team productivity and workflow optimization.",
-      tech: ["Vue.js", "PHP", "Docker"],
-      demo: "#",
-      code: "#",
-      image: null,
-      status: "coming-soon"
+      tech: ["Vue.js", "JavaScript", "Laravel","MySQL", "Docker"],
+      code: "https://github.com/AlvaroMillanEstevez/Task-Management-System",
+      image: ".assets/TaskManagerDashboard.png",
+      vide: ".assets/videos/videoDemoTaskManager.mp4",
+      status: "active"
     },
     {
       title: "Analytics Dashboard",
