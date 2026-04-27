@@ -40,9 +40,9 @@ const App = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const EMAILJS_CONFIG = {
-    SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-    TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-    PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    SERVICE_ID: process.env.REACT_APP_EMAILJS_SERVICE_ID,
+    TEMPLATE_ID: process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+    PUBLIC_KEY: process.env.REACT_APP_EMAILJS_PUBLIC_KEY
   };
 
   const cvPath = '/assets/CV_Alvaro_Millan_Estevez_Remote_FullStack_EN.pdf';
@@ -876,8 +876,8 @@ const App = () => {
               {submitStatus && (
                 <div
                   className={`absolute top-4 left-4 right-4 p-4 rounded-lg flex items-center gap-3 z-10 ${submitStatus === 'success'
-                      ? 'bg-green-500/20 border border-green-500/30 text-green-300'
-                      : 'bg-red-500/20 border border-red-500/30 text-red-300'
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-300'
+                    : 'bg-red-500/20 border border-red-500/30 text-red-300'
                     }`}
                 >
                   {submitStatus === 'success' ? (
@@ -939,8 +939,8 @@ const App = () => {
                   type="submit"
                   disabled={isSubmitting}
                   className={`w-full py-4 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${isSubmitting
-                      ? 'bg-gray-600 cursor-not-allowed'
-                      : 'bg-blue-700 hover:bg-blue-800 transform hover:-translate-y-1'
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-800 transform hover:-translate-y-1'
                     } text-white`}
                 >
                   {isSubmitting ? (
