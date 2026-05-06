@@ -260,6 +260,22 @@ const App = () => {
 
   const projects = [
     {
+      title: 'RAG Chatbot Agent',
+      subtitle: 'AI website assistant trained on custom documentation with source citations.',
+      description:
+        'A local RAG chatbot built with FastAPI, LlamaIndex, Ollama, Chroma and Vue. It can ingest documents, answer questions using a custom knowledge base and show the sources used for each response.',
+      highlights: [
+        'RAG document-based question answering',
+        'Local LLM integration with Ollama',
+        'Chroma vector database',
+        'Source citations for generated answers'
+      ],
+      tech: ['FastAPI', 'LlamaIndex', 'Ollama', 'Chroma', 'Vue'],
+      code: 'https://github.com/AlvaroMillanEstevez/rag-chatbot-agent',
+      image: 'RAGChatbot.png',
+      video: 'videos/RagChatbotPorfolio.mp4'
+    },
+    {
       title: 'E-commerce Admin Dashboard',
       subtitle: 'Full-stack admin panel for managing products, orders and users.',
       description:

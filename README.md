@@ -6,7 +6,7 @@
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/alvaro-millan-estevez-27b814375)
 [![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail)](mailto:alvaromye@gmail.com)
 
-**Full Stack Developer | Specialized in Vue.js, Laravel & Modern Technologies**
+**Full Stack Developer | Laravel · Vue · React · APIs · AI Integrations**
 
 *🚀 Turning ideas into scalable, high-performance web applications*
 
@@ -32,12 +32,83 @@ I'm a passionate developer dedicated to creating **innovative and efficient web 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-000000?style=flat-square&logo=ollama&logoColor=white)
+![AI](https://img.shields.io/badge/AI_Integrations-7C3AED?style=flat-square&logo=openai&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
 
 </div>
 
 ---
 
 ## 💼 Featured Projects
+
+### 🤖 **RAG Chatbot Agent** - *AI Website Assistant with Local RAG*
+> Full-stack AI chatbot that answers questions using custom documentation, local LLMs and source citations.
+
+**🎯 Key Features:**
+- 🧠 RAG-based question answering using custom documents
+- 📚 Document ingestion with Markdown, TXT, PDF and DOCX support
+- 🔎 Vector search with ChromaDB
+- 💬 Local LLM integration with Ollama
+- ⚡ FastAPI backend with `/chat`, `/ingest`, `/health` and reset endpoints
+- 🖥️ Vue frontend with chat interface, loading states and source display
+- 📌 Source citations showing the document chunks used for each answer
+
+**🔧 Tech Stack:** FastAPI + LlamaIndex + Ollama + ChromaDB + Vue + Docker
+
+**📈 Results:** 
+- ✅ Built a working local RAG pipeline from document ingestion to AI-generated answers
+- 🔐 Privacy-friendly architecture with local document processing
+- 🧩 Adaptable to business websites, FAQs, internal documentation and customer support
+
+[![View Project](https://img.shields.io/badge/View_Project-GitHub-181717?style=flat-square&logo=github)](https://github.com/AlvaroMillanEstevez/rag-chatbot-agent)
+[![Portfolio Demo](https://img.shields.io/badge/Portfolio_Demo-Watch-4FC08D?style=flat-square&logo=vue.js)](https://alvaromillanestevez.github.io)
+
+---
+
+### 🛍️ **VueShop Admin** - *E-commerce Dashboard*
+> Complete administration panel for e-commerce with Vue 3, TypeScript, and Laravel.
+
+**🎯 Key Features:**
+- 🔐 JWT authentication with protected API access
+- 📊 Admin dashboard for managing ecommerce operations
+- 📦 Product, order and user management modules
+- 🌙 Responsive interface with modern UI structure
+- ⚡ Frontend and backend integration through REST APIs
+
+**🔧 Tech Stack:** Vue 3 + TypeScript + Laravel + MySQL + JWT
+
+**📈 Results:** 
+- 🧩 Built a practical full-stack admin dashboard
+- 📱 Responsive management screens
+- 🔌 Integrated a Laravel API with a Vue 3 frontend
+
+[![View Project](https://img.shields.io/badge/View_Project-GitHub-181717?style=flat-square&logo=github)](https://github.com/AlvaroMillanEstevez/VueShop-Admin)
+[![Live Demo](https://img.shields.io/badge/Portfolio_Demo-Visit-4FC08D?style=flat-square&logo=vue.js)](https://alvaromillanestevez.github.io)
+
+---
+
+### ✅ **Task Management System** - *Productivity & Workflow App*
+> Task management web application focused on users, roles, tasks and CRUD workflows.
+
+**🎯 Key Features:**
+- 🔐 User authentication
+- 👥 Role-based logic
+- ✅ Task CRUD operations
+- 📱 Responsive UI
+- 🐳 Docker/VPS deployment preparation
+- 🔌 Laravel backend connected to a Vue frontend
+
+**🔧 Tech Stack:** Vue 3 + Laravel + MySQL + Tailwind CSS + Docker
+
+**📈 Results:** 
+- 🧱 Built a complete task management workflow
+- ⚙️ Practiced full-stack architecture with Laravel and Vue
+- 🚀 Prepared the project for deployment-oriented environments
+
+[![View Project](https://img.shields.io/badge/View_Project-GitHub-181717?style=flat-square&logo=github)](https://github.com/AlvaroMillanEstevez/Task-Management-System)
+[![Portfolio Demo](https://img.shields.io/badge/Portfolio_Demo-Watch-4FC08D?style=flat-square&logo=vue.js)](https://alvaromillanestevez.github.io)
 
 ### 🛍️ **VueShop Admin** - *E-commerce Dashboard*
 > Complete administration panel for e-commerce with Vue 3, TypeScript, and Laravel
