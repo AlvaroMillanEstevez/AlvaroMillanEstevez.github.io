@@ -272,8 +272,8 @@ const App = () => {
       ],
       tech: ['FastAPI', 'LlamaIndex', 'Ollama', 'Chroma', 'Vue'],
       code: 'https://github.com/AlvaroMillanEstevez/rag-chatbot-agent',
-      image: 'RAGChatbot.png',
-      video: 'videos/RagChatbotPorfolio.mp4'
+      image: 'assets/RAGChatbot.png',
+      video: 'assets/videos/RagChatbotPorfolio.mp4'
     },
     {
       title: 'E-commerce Admin Dashboard',
