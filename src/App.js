@@ -28,6 +28,23 @@ import {
   Zap
 } from 'lucide-react';
 
+const navigationItems = [
+    { label: 'Home', id: 'home' },
+    { label: 'About', id: 'about' },
+    { label: 'Experience', id: 'experience' },
+    { label: 'Skills', id: 'skills' },
+    { label: 'Projects', id: 'projects' },
+    { label: 'Contact', id: 'contact' }
+  ];
+
+  const mobileNavigationItems = [
+    { label: 'About', id: 'about' },
+    { label: 'Experience', id: 'experience' },
+    { label: 'Skills', id: 'skills' },
+    { label: 'Projects', id: 'projects' },
+    { label: 'Contact', id: 'contact' }
+  ];
+
 const App = () => {
   const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
@@ -55,23 +72,6 @@ const App = () => {
     en: '/assets/alvaro_millan_fullstack_en_photo.docx',
     es: '/assets/alvaro_millan_fullstack_es_photo.docx'
   };
-
-  const navigationItems = [
-    { label: 'Home', id: 'home' },
-    { label: 'About', id: 'about' },
-    { label: 'Experience', id: 'experience' },
-    { label: 'Skills', id: 'skills' },
-    { label: 'Projects', id: 'projects' },
-    { label: 'Contact', id: 'contact' }
-  ];
-
-  const mobileNavigationItems = [
-    { label: 'About', id: 'about' },
-    { label: 'Experience', id: 'experience' },
-    { label: 'Skills', id: 'skills' },
-    { label: 'Projects', id: 'projects' },
-    { label: 'Contact', id: 'contact' }
-  ];
 
   useEffect(() => {
     if (!EMAILJS_CONFIG.PUBLIC_KEY) return;
