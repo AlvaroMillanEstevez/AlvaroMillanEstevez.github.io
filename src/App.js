@@ -1,33 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  AlertCircle,
+  ArrowRight,
+  Bot,
+  Briefcase,
+  CheckCircle,
   ChevronDown,
+  Code2,
+  Database,
   Download,
-  Mail,
-  Phone,
-  MapPin,
   ExternalLink,
+  FileText,
   Github,
+  Globe2,
   Linkedin,
+  Mail,
+  MapPin,
   Menu,
-  X,
+  Phone,
   Play,
   Send,
-  CheckCircle,
-  AlertCircle,
-  Code2,
-  Bot,
-  ShoppingCart,
   Server,
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  TestTube2,
   Wrench,
-  Rocket,
-  Globe2,
-  ShieldCheck
+  X,
+  Zap
 } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [expandedSection, setExpandedSection] = useState('technical');
+  const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,7 +52,19 @@ const App = () => {
     PUBLIC_KEY: process.env.REACT_APP_EMAILJS_PUBLIC_KEY
   };
 
-  const cvPath = '/assets/CV_Alvaro_Millan_Estevez_Remote_FullStack_EN.pdf';
+  const cvFiles = {
+    en: '/assets/alvaro_millan_fullstack_en_photo.docx',
+    es: '/assets/alvaro_millan_fullstack_es_photo.docx'
+  };
+
+  const navigationItems = [
+    { label: 'Home', id: 'home' },
+    { label: 'About', id: 'about' },
+    { label: 'Experience', id: 'experience' },
+    { label: 'Skills', id: 'skills' },
+    { label: 'Projects', id: 'projects' },
+    { label: 'Contact', id: 'contact' }
+  ];
 
   useEffect(() => {
     if (!EMAILJS_CONFIG.PUBLIC_KEY) return;
@@ -72,18 +91,59 @@ const App = () => {
   useEffect(() => {
     const handleScroll = () => {
       const navbar = document.querySelector('.navbar');
+      const scrollTop = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = documentHeight > 0 ? (scrollTop / documentHeight) * 100 : 0;
 
-      if (!navbar) return;
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
 
-      if (window.scrollY > 100) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
+      if (navbar) {
+        navbar.classList.toggle('scrolled', scrollTop > 40);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const revealElements = document.querySelectorAll('.reveal');
+
+    if (!('IntersectionObserver' in window)) {
+      revealElements.forEach((element) => element.classList.add('is-visible'));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    revealElements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedVideoProject(null);
+        setIsCvMenuOpen(false);
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const scrollToSection = (sectionId) => {
@@ -94,14 +154,7 @@ const App = () => {
     }
 
     setIsMenuOpen(false);
-  };
-
-  const closeVideoModal = () => {
-    setSelectedVideoProject(null);
-  };
-
-  const toggleSection = (sectionId) => {
-    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+    setIsCvMenuOpen(false);
   };
 
   const handleInputChange = (event) => {
@@ -166,238 +219,238 @@ const App = () => {
     }
   };
 
-  const navigationItems = ['Home', 'About', 'Services', 'Skills', 'Projects', 'Contact'];
-
-  const skills = [
+  const experiences = [
     {
-      name: 'HTML5',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'
+      period: '2025 — Present',
+      role: 'Software Developer & Technical QA',
+      company: 'Confidential Software Product',
+      meta: 'Freelance · Part-time',
+      icon: Briefcase,
+      description:
+        'Current collaboration inside an existing development team and codebase. Client and product details are withheld due to confidentiality.',
+      bullets: [
+        'Investigated, reproduced or resolved 200+ issues across frontend, API integration and end-to-end application flows.',
+        'Built and debugged Vue/TypeScript interfaces, REST API integrations and Socket.IO real-time communication.',
+        'Worked on user chat, authentication, roles and permissions, payment-provider integrations and RAG-assisted functionality.',
+        'Combined technical QA, regression testing and root-cause analysis with practical UX and technical improvement proposals.'
+      ],
+      tech: ['Vue 3', 'TypeScript', 'REST APIs', 'Socket.IO', 'Git', 'Technical QA']
     },
     {
-      name: 'CSS3',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'
+      period: 'Mar 2025 — Jun 2025',
+      role: 'Full-Stack Developer Intern',
+      company: 'Comunica.dk Translations S.L.',
+      meta: 'Final-degree internship',
+      icon: Code2,
+      description:
+        'Owned a real internal business problem from workflow analysis and technical research through proposal and implementation.',
+      bullets: [
+        'Designed and developed an AI-powered plugin integrated with the company CRM and employee workflow.',
+        'Implemented analysis of employee-client email threads with summaries, contextual insights and response assistance.',
+        'Added automatic draft correction and language transformation/translation features.',
+        'Worked across full-stack development, integrations and deployment/DevOps-related tasks.'
+      ],
+      tech: ['Full-Stack', 'AI Integration', 'CRM', 'APIs', 'DevOps']
     },
     {
-      name: 'JavaScript',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'
-    },
-    {
-      name: 'TypeScript',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg'
-    },
-    {
-      name: 'Vue.js',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg'
-    },
-    {
-      name: 'React',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'
-    },
-    {
-      name: 'Laravel',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg'
-    },
-    {
-      name: 'PHP',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg'
-    },
-    {
-      name: 'MySQL',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg'
-    },
-    {
-      name: 'Docker',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'
-    },
-    {
-      name: 'Git',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg'
-    },
-    {
-      name: 'GitHub',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg'
+      period: 'Project-based',
+      role: 'Freelance Web Developer',
+      company: 'Asociación Respira',
+      meta: 'Internal management system',
+      icon: Database,
+      description:
+        'Delivered a database-driven internal tool adapted to the organisation’s real operational workflow.',
+      bullets: [
+        'Developed a PHP/MySQL system for registering, consulting and managing social-intervention records.',
+        'Implemented authentication, access control and data-driven management screens.',
+        'Validated core flows, form submissions, permissions and data consistency before delivery.'
+      ],
+      tech: ['PHP', 'MySQL', 'Authentication', 'Data Validation']
     }
   ];
 
-  const services = [
-    {
-      icon: Code2,
-      title: 'Full-Stack Web Applications',
-      description:
-        'Practical web apps, internal tools and CRUD platforms built with Laravel, Vue, React, PHP and MySQL.'
-    },
+  const coreSkills = [
+    { name: 'Vue 3', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg' },
+    { name: 'TypeScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+    { name: 'Laravel', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg' },
+    { name: 'PHP', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
+    { name: 'JavaScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+    { name: 'MySQL', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
+    { name: 'Docker', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
+    { name: 'Git', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' }
+  ];
+
+  const capabilityGroups = [
     {
       icon: Server,
-      title: 'Laravel APIs & Backend',
-      description:
-        'REST APIs, authentication flows, database structures, protected routes and backend logic.'
+      title: 'APIs & Integration',
+      items: ['REST APIs', 'Postman', 'Swagger / OpenAPI', 'Webhooks', 'Socket.IO', 'Third-party integrations']
+    },
+    {
+      icon: TestTube2,
+      title: 'Quality & Debugging',
+      items: ['Technical QA', 'Regression testing', 'API validation', 'Root-cause debugging', 'End-to-end flows']
     },
     {
       icon: Bot,
-      title: 'AI Integrations',
-      description:
-        'Chatbots, AI-powered content tools and workflow automations using modern AI APIs.'
+      title: 'Applied AI',
+      items: ['OpenAI API', 'Claude API', 'RAG', 'LLM workflows', 'Dynamic prompts', 'AI-assisted automation']
     },
     {
-      icon: ShoppingCart,
-      title: 'Ecommerce Tools',
-      description:
-        'Admin dashboards, product pages, product data workflows and ecommerce-focused landing pages.'
-    },
-    {
-      icon: Wrench,
-      title: 'Bug Fixing & Improvements',
-      description:
-        'Frontend fixes, API connection issues, responsive improvements, form fixes and project cleanup.'
-    },
-    {
-      icon: Rocket,
-      title: 'Deployment Support',
-      description:
-        'Project setup, GitHub workflow, Docker Compose, VPS deployment and production preparation.'
+      icon: Terminal,
+      title: 'Engineering Workflow',
+      items: ['Git / GitHub', 'Docker Compose', 'Linux', 'Vite', 'NPM', 'Composer']
     }
   ];
 
   const projects = [
     {
-      title: 'RAG Chatbot Agent',
-      subtitle: 'AI website assistant trained on custom documentation with source citations.',
+      title: 'Nusa Creator Studio',
+      subtitle: 'AI-powered SaaS for social-commerce content workflows.',
+      status: 'In development',
+      statusClass: 'bg-amber-400/90 text-slate-950',
       description:
-        'A local RAG chatbot built with FastAPI, LlamaIndex, Ollama, Chroma and Vue. It can ingest documents, answer questions using a custom knowledge base and show the sources used for each response.',
+        'Independent full-stack SaaS product built around AI-assisted content generation, structured workflows and subscription-style product rules.',
       highlights: [
-        'RAG document-based question answering',
-        'Local LLM integration with Ollama',
-        'Chroma vector database',
-        'Source citations for generated answers'
+        'Laravel REST API + Vue 3 / TypeScript frontend',
+        'Projects, generation history, credits and plan-based feature gating',
+        'Decoupled AI providers and dynamic prompts',
+        'API/frontend tests including ownership, credit rules and multilingual inputs'
       ],
-      tech: ['FastAPI', 'LlamaIndex', 'Ollama', 'Chroma', 'Vue'],
+      tech: ['Vue 3', 'TypeScript', 'Laravel', 'Pinia', 'Tailwind CSS', 'REST APIs', 'AI'],
+      code: null,
+      image: 'assets/demoNusaCreatorStudio.png',
+      video: 'assets/videos/videoDemoNusaCreatorStudio.mp4'
+    },
+    {
+      title: 'AI / RAG Knowledge Assistant',
+      subtitle: 'Document-grounded assistant with retrieval and source-aware responses.',
+      status: 'Prototype',
+      statusClass: 'bg-violet-400/90 text-slate-950',
+      description:
+        'RAG application designed to answer questions using private or business-specific documentation instead of relying only on general LLM knowledge.',
+      highlights: [
+        'Document ingestion and chunking workflow',
+        'Semantic retrieval and context construction',
+        'Local LLM experimentation with Ollama',
+        'Response validation and source-aware answers'
+      ],
+      tech: ['FastAPI', 'LlamaIndex', 'Ollama', 'Chroma', 'Vue', 'RAG'],
       code: 'https://github.com/AlvaroMillanEstevez/rag-chatbot-agent',
       image: 'assets/RAGChatbot.png',
       video: 'assets/videos/RagChatbotPorfolio.mp4'
     },
     {
       title: 'E-commerce Admin Dashboard',
-      subtitle: 'Full-stack admin panel for managing products, orders and users.',
+      subtitle: 'Full-stack administration panel for products, orders and users.',
+      status: 'Demo',
+      statusClass: 'bg-emerald-400/90 text-slate-950',
       description:
-        'Built with Vue 3, TypeScript and Laravel. Includes authenticated API access, responsive management screens and reusable frontend components.',
+        'Full-stack dashboard focused on authenticated management flows, API integration, reusable UI components and responsive administration screens.',
       highlights: [
-        'JWT authentication',
+        'JWT authentication and protected routes',
         'Product, order and user management',
-        'REST API integration',
-        'Responsive dashboard UI'
+        'Laravel REST API integration',
+        'CRUD flow and API-response validation'
       ],
-      tech: ['Vue 3', 'TypeScript', 'Laravel', 'MySQL', 'JWT'],
+      tech: ['Vue 3', 'TypeScript', 'Laravel', 'MySQL', 'JWT', 'REST APIs'],
       code: 'https://github.com/AlvaroMillanEstevez/VueShop-Admin',
       image: 'assets/EcommerceAdminPanel.png',
       video: 'assets/videos/videoDemoEcommerceAdminPanel.mp4'
-    },
-    {
-      title: 'Task Management System',
-      subtitle: 'Task management platform with users, roles and task workflows.',
-      description:
-        'A Vue + Laravel application focused on task organization, authentication, user roles and CRUD operations.',
-      highlights: [
-        'User authentication',
-        'Task CRUD operations',
-        'Role-based logic',
-        'Docker/VPS deployment'
-      ],
-      tech: ['Vue 3', 'Laravel', 'MySQL', 'Tailwind CSS', 'Docker'],
-      code: 'https://github.com/AlvaroMillanEstevez/Task-Management-System',
-      image: 'assets/TaskManagerDashboard.png',
-      video: 'assets/videos/videoDemoTaskManager.mp4'
-    },
-    {
-      title: 'Event Review & Booking App',
-      subtitle: 'Event discovery and booking platform using external API data.',
-      description:
-        'Laravel + React project integrating the Ticketmaster API to display events, manage bookings and support event reviews.',
-      highlights: [
-        'Ticketmaster API integration',
-        'Booking flow',
-        'Review system',
-        'Database-driven features'
-      ],
-      tech: ['Laravel', 'React', 'MySQL', 'Ticketmaster API'],
-      code: null,
-      image: null,
-      video: null
     }
   ];
 
-  const aboutSections = [
+  const strengths = [
     {
-      id: 'technical',
-      title: 'Technical Focus',
-      icon: '💻',
-      preview: 'Laravel, Vue, React, APIs, databases and practical business tools.',
-      content:
-        'I build full-stack web applications using Laravel, Vue.js, React, PHP and MySQL. I focus on clean interfaces, API-driven architecture, authentication, CRUD systems and practical tools that solve real business problems.'
+      icon: Sparkles,
+      title: 'Business → Technical',
+      text: 'I analyse real business needs, investigate alternatives and translate them into practical implementation decisions.'
     },
     {
-      id: 'freelance',
-      title: 'Freelance & Client Experience',
-      icon: '🤝',
-      preview: 'Experience delivering real projects and understanding client needs.',
-      content:
-        'I have delivered freelance and independent projects, including an internal management system for Asociación Respira and several full-stack applications. My previous professional background also helps me communicate clearly, understand business needs and work with responsibility.'
+      icon: ShieldCheck,
+      title: 'Build + Validate',
+      text: 'Development and technical QA go together: implementation, API validation, regression checks and root-cause debugging.'
     },
     {
-      id: 'remote',
-      title: 'Remote Work & Direction',
-      icon: '🌍',
-      preview: 'Available for remote work, freelance projects and international collaboration.',
-      content:
-        'I am currently based between Indonesia and Spain, looking for remote opportunities, freelance collaborations and projects related to web development, ecommerce and AI-powered automation.'
+      icon: Zap,
+      title: 'Fast Adaptation',
+      text: 'I become productive quickly in unfamiliar codebases, technologies and team workflows without losing attention to quality.'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-950">
-      <nav className="navbar fixed top-0 w-full z-50 transition-all duration-300 bg-white/95 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-300 selection:text-slate-950">
+      <div
+        className="fixed top-0 left-0 z-[70] h-[3px] bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-[width] duration-100"
+        style={{ width: `${scrollProgress}%` }}
+      />
+
+      <nav className="navbar fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button
               onClick={() => scrollToSection('home')}
-              className="text-xl font-bold text-blue-700"
+              className="group flex items-center gap-3"
+              aria-label="Go to home"
             >
-              Álvaro Millán
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+                AM
+              </span>
+              <span className="hidden sm:block text-sm font-semibold tracking-wide text-white">
+                Álvaro Millán Estevez
+              </span>
             </button>
 
-            <div className="hidden md:flex space-x-7">
+            <div className="hidden lg:flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-xl">
               {navigationItems.map((item) => (
                 <button
-                  key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
-                  className="text-gray-700 hover:text-blue-700 transition-colors duration-200 font-medium"
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="px-4 py-2 rounded-full text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-all"
                 >
-                  {item}
+                  {item.label}
                 </button>
               ))}
             </div>
 
+            <div className="hidden lg:flex items-center gap-3">
+              <a
+                href="https://github.com/AlvaroMillanEstevez"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/10 flex items-center justify-center transition-all hover:-translate-y-0.5"
+                aria-label="GitHub"
+              >
+                <Github size={18} />
+              </a>
+              <button
+                onClick={() => scrollToSection('contact')}
+                className="px-4 py-2 rounded-xl bg-white text-slate-950 text-sm font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5"
+              >
+                Contact
+              </button>
+            </div>
+
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 hover:text-blue-700"
+              onClick={() => setIsMenuOpen((value) => !value)}
+              className="lg:hidden w-10 h-10 rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center"
               aria-label="Toggle navigation menu"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
             </button>
           </div>
 
           {isMenuOpen && (
-            <div className="md:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-md border-t">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navigationItems.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => scrollToSection(item.toLowerCase())}
-                    className="block px-3 py-2 text-gray-700 hover:text-blue-700 transition-colors duration-200 font-medium w-full text-left"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+            <div className="lg:hidden absolute top-16 left-4 right-4 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-3">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="block px-4 py-3 rounded-xl text-slate-200 hover:bg-white/10 w-full text-left transition-colors"
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -405,331 +458,407 @@ const App = () => {
 
       <section
         id="home"
-        className="min-h-screen flex items-center justify-center text-center text-white relative overflow-hidden pt-20"
+        className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16"
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="mb-8 relative">
-            <img
-              src="/assets/AlvaroMillanEstevez2.jpg"
-              alt="Álvaro Millán Estevez"
-              className="w-44 h-44 sm:w-56 sm:h-56 mx-auto rounded-full border-4 border-white/30 object-cover shadow-2xl"
-            />
-          </div>
+        <div className="absolute inset-0 hero-grid opacity-30 pointer-events-none" />
+        <div className="absolute -top-40 -left-28 w-[34rem] h-[34rem] rounded-full bg-cyan-500/20 blur-[120px] animate-orbit-slow pointer-events-none" />
+        <div className="absolute top-1/3 -right-40 w-[38rem] h-[38rem] rounded-full bg-violet-600/20 blur-[140px] animate-orbit-reverse pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[24rem] h-[24rem] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
 
-          <p className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm mb-5">
-            <Globe2 size={16} />
-            Available for remote work and freelance projects worldwide
-          </p>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 animate-fadeInUp">
-            Álvaro Millán Estevez
-          </h1>
-
-          <p className="text-xl sm:text-2xl mb-4 opacity-95 animate-fadeInUp delay-200">
-            Full-Stack Web Developer | Laravel · Vue · React · AI Integrations
-          </p>
-
-          <p className="text-base sm:text-lg mb-6 max-w-3xl mx-auto opacity-90 leading-relaxed animate-fadeInUp delay-300">
-            I build responsive web applications, admin dashboards and API-driven platforms using
-            Laravel, Vue.js, React and MySQL. I also create AI-powered tools and automations for
-            businesses looking to save time and improve their workflows.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-8 animate-fadeInUp delay-400">
-            {['Laravel', 'Vue 3', 'React', 'PHP', 'MySQL', 'REST APIs', 'AI Integrations'].map(
-              (tag) => (
-                <span
-                  key={tag}
-                  className="bg-white/10 border border-white/20 rounded-full px-3 py-1 text-sm"
-                >
-                  {tag}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="grid lg:grid-cols-[1.3fr_0.7fr] gap-12 lg:gap-16 items-center">
+            <div className="reveal">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200 mb-7">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-              )
-            )}
-          </div>
+                Open to full-time Software Engineering opportunities
+              </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8 animate-fadeInUp delay-400">
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <Mail size={18} />
-              <span>alvaromye@gmail.com</span>
-            </div>
+              <p className="text-cyan-300 uppercase tracking-[0.24em] text-xs sm:text-sm font-semibold mb-4">
+                Full-Stack Developer · Software Engineer
+              </p>
 
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <Phone size={18} />
-              <span>+34 610 017 065</span>
-            </div>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5.3rem] font-black tracking-[-0.04em] leading-[0.96] text-white mb-7">
+                Building software that
+                <span className="block gradient-text">solves real problems.</span>
+              </h1>
 
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <MapPin size={18} />
-              <span>Indonesia / Spain</span>
-            </div>
-          </div>
+              <p className="text-lg sm:text-xl text-slate-300 leading-relaxed max-w-3xl mb-8">
+                I build and improve web products with Vue, TypeScript, Laravel and REST APIs —
+                combining software development, technical QA, root-cause debugging and practical AI
+                integration with a strong understanding of business needs.
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp delay-500">
-            <button
-              onClick={() => scrollToSection('projects')}
-              className="bg-white text-blue-700 hover:bg-blue-50 px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2"
-            >
-              <ExternalLink size={20} />
-              View Projects
-            </button>
+              <div className="flex flex-wrap gap-2.5 mb-9">
+                {['Vue 3', 'TypeScript', 'Laravel', 'REST APIs', 'MySQL', 'Docker', 'RAG / AI'].map(
+                  (tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-sm text-slate-200 backdrop-blur"
+                    >
+                      {tag}
+                    </span>
+                  )
+                )}
+              </div>
 
-            <a
-              href={cvPath}
-              download="CV_Alvaro_Millan_Estevez_Remote_FullStack_EN.pdf"
-              className="bg-white/15 hover:bg-white hover:text-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-white/30"
-            >
-              <Download size={20} />
-              Download CV
-            </a>
-
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="bg-transparent hover:bg-white/10 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-white/50"
-            >
-              <Mail size={20} />
-              Contact Me
-            </button>
-          </div>
-        </div>
-
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full animate-float"></div>
-          <div className="absolute top-1/3 -right-8 w-32 h-32 bg-white/5 rounded-full animate-float delay-1000"></div>
-          <div className="absolute bottom-1/4 left-1/4 w-16 h-16 bg-white/10 rounded-full animate-float delay-2000"></div>
-        </div>
-      </section>
-
-      <section id="about" className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-4">
-            About Me
-          </h2>
-          <div className="w-16 h-1 bg-blue-700 mx-auto mb-12"></div>
-
-          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-12">
-            <h3 className="text-2xl sm:text-3xl font-bold text-center text-blue-700 mb-5">
-              Web developer focused on practical digital products
-            </h3>
-
-            <p className="text-gray-700 leading-relaxed text-center max-w-4xl mx-auto mb-10">
-              I am a web application developer focused on building practical digital products with
-              Laravel, Vue.js, React and MySQL. My background includes freelance work, independent
-              full-stack projects and previous experience managing clients and projects in other
-              industries.
-            </p>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {aboutSections.map((section) => (
-                <div
-                  key={section.id}
-                  className="border-2 border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-600 hover:shadow-lg"
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+                <button
+                  onClick={() => scrollToSection('experience')}
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-950 px-6 py-3.5 font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5 shadow-xl shadow-black/10"
                 >
+                  View Experience
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+
+                <div className="relative">
                   <button
                     type="button"
-                    onClick={() => toggleSection(section.id)}
-                    className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white p-4 cursor-pointer flex justify-between items-center hover:from-blue-800 hover:to-indigo-800 transition-all duration-300 w-full"
+                    onClick={() => setIsCvMenuOpen((value) => !value)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500/10 border border-cyan-300/25 text-cyan-100 px-6 py-3.5 font-semibold hover:bg-cyan-400/15 transition-all hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center gap-3 text-left">
-                      <span className="text-xl">{section.icon}</span>
-                      <span className="font-semibold text-sm sm:text-base">{section.title}</span>
-                    </div>
+                    <Download size={18} />
+                    Download CV
                     <ChevronDown
-                      size={20}
-                      className={`transition-transform duration-300 ${expandedSection === section.id ? 'rotate-180' : ''
-                        }`}
+                      size={16}
+                      className={`transition-transform ${isCvMenuOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
 
-                  {expandedSection !== section.id && (
-                    <div className="p-4 bg-gray-50 text-gray-600 text-sm italic">
-                      {section.preview}
-                    </div>
-                  )}
-
-                  {expandedSection === section.id && (
-                    <div className="p-4 bg-white animate-fadeInUp">
-                      <p className="text-gray-700 leading-relaxed">{section.content}</p>
+                  {isCvMenuOpen && (
+                    <div className="absolute z-30 mt-2 w-full min-w-[220px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-2">
+                      <a
+                        href={cvFiles.en}
+                        download="alvaro_millan_fullstack_en_photo.docx"
+                        className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors"
+                      >
+                        <span>
+                          <span className="block font-semibold text-white">English CV</span>
+                          <span className="block text-xs text-slate-400">Professional · DOCX</span>
+                        </span>
+                        <FileText size={18} className="text-cyan-300" />
+                      </a>
+                      <a
+                        href={cvFiles.es}
+                        download="alvaro_millan_fullstack_es_photo.docx"
+                        className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors"
+                      >
+                        <span>
+                          <span className="block font-semibold text-white">CV en español</span>
+                          <span className="block text-xs text-slate-400">Profesional · DOCX</span>
+                        </span>
+                        <FileText size={18} className="text-violet-300" />
+                      </a>
                     </div>
                   )}
                 </div>
+
+                <a
+                  href="https://github.com/AlvaroMillanEstevez"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] text-white px-6 py-3.5 font-semibold hover:bg-white/10 transition-all hover:-translate-y-0.5"
+                >
+                  <Github size={18} />
+                  GitHub
+                </a>
+              </div>
+            </div>
+
+            <div className="reveal relative max-w-md mx-auto lg:max-w-none w-full">
+              <div className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-br from-cyan-400/30 via-blue-500/10 to-violet-500/30 blur-2xl scale-95" />
+              <div className="relative rounded-[2.25rem] border border-white/15 bg-white/[0.06] backdrop-blur-xl p-4 shadow-2xl">
+                <div className="rounded-[1.75rem] overflow-hidden bg-slate-900 aspect-[4/5]">
+                  <img
+                    src="/assets/AlvaroMillanEstevez2.jpg"
+                    alt="Álvaro Millán Estevez"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                    <div className="text-2xl font-black text-white">200+</div>
+                    <div className="text-xs text-slate-400 mt-1">issues investigated / resolved</div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                    <div className="text-2xl font-black text-white">Full-Stack</div>
+                    <div className="text-xs text-slate-400 mt-1">development + technical QA</div>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-2xl border border-white/10 bg-slate-950/50 p-4 flex items-center gap-3">
+                  <Globe2 size={19} className="text-cyan-300 shrink-0" />
+                  <div>
+                    <div className="text-sm font-semibold text-white">Spain / Indonesia</div>
+                    <div className="text-xs text-slate-400">Remote · Spain / EU opportunities</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2 text-slate-500 text-xs">
+          <span>Explore</span>
+          <ChevronDown size={18} className="animate-bounce" />
+        </div>
+      </section>
+
+      <section id="about" className="relative py-24 sm:py-28 bg-white text-slate-950 overflow-hidden">
+        <div className="absolute inset-0 subtle-grid pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="reveal grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16 items-start">
+            <div>
+              <p className="section-kicker">About</p>
+              <h2 className="section-title text-slate-950">
+                Engineering with a
+                <span className="block text-blue-700">business perspective.</span>
+              </h2>
+            </div>
+
+            <div>
+              <p className="text-xl text-slate-700 leading-relaxed mb-5">
+                I am a Full-Stack Developer and Software Engineer focused on building, debugging and
+                improving web applications, APIs and business-oriented software.
+              </p>
+              <p className="text-slate-600 leading-relaxed mb-8">
+                My background combines software development with technical QA, business management
+                and practical product thinking. I enjoy understanding why a workflow exists, where
+                friction appears and how technology can turn that problem into a maintainable,
+                useful solution.
+              </p>
+
+              <div className="grid sm:grid-cols-3 gap-4">
+                {strengths.map((strength) => (
+                  <div
+                    key={strength.title}
+                    className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-slate-950 text-cyan-300 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                      <strength.icon size={20} />
+                    </div>
+                    <h3 className="font-bold text-slate-950 mb-2">{strength.title}</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">{strength.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience" className="py-24 sm:py-28 bg-slate-950 relative overflow-hidden">
+        <div className="absolute -left-40 top-28 w-96 h-96 rounded-full bg-blue-600/10 blur-[120px]" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="reveal max-w-3xl mb-14">
+            <p className="section-kicker text-cyan-300">Experience</p>
+            <h2 className="section-title text-white">Real product work, not just demo projects.</h2>
+            <p className="text-slate-400 text-lg leading-relaxed mt-5">
+              Development, integration, technical QA and problem-solving across real business
+              workflows and existing software products.
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-[21px] sm:left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-cyan-400/70 via-blue-500/40 to-transparent" />
+
+            <div className="space-y-6">
+              {experiences.map((experience) => (
+                <article
+                  key={`${experience.company}-${experience.role}`}
+                  className="reveal relative pl-14 sm:pl-20"
+                >
+                  <div className="absolute left-0 top-5 w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-white/10 text-cyan-300 flex items-center justify-center shadow-xl">
+                    <experience.icon size={21} />
+                  </div>
+
+                  <div className="group rounded-3xl border border-white/10 bg-white/[0.045] hover:bg-white/[0.065] p-6 sm:p-8 transition-all duration-300 hover:border-cyan-300/20">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
+                      <div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white">{experience.role}</h3>
+                        <p className="text-cyan-300 font-medium mt-1">{experience.company}</p>
+                        <p className="text-sm text-slate-500 mt-1">{experience.meta}</p>
+                      </div>
+                      <span className="text-sm text-slate-400 lg:text-right whitespace-nowrap">
+                        {experience.period}
+                      </span>
+                    </div>
+
+                    <p className="text-slate-300 leading-relaxed mb-5">{experience.description}</p>
+
+                    <ul className="grid gap-2.5 mb-6">
+                      {experience.bullets.map((bullet) => (
+                        <li key={bullet} className="flex gap-3 text-sm sm:text-base text-slate-300 leading-relaxed">
+                          <CheckCircle size={17} className="text-emerald-400 mt-1 shrink-0" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="flex flex-wrap gap-2">
+                      {experience.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-full bg-white/[0.06] border border-white/10 px-3 py-1.5 text-xs text-slate-300"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section id="services" className="py-20 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-4">
-            Services
-          </h2>
-          <div className="w-16 h-1 bg-blue-700 mx-auto mb-12"></div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            {services.map((service) => (
-              <div
-                key={service.title}
-                className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-5">
-                  <service.icon size={24} />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{service.title}</h3>
-                <p className="text-gray-600 leading-relaxed text-sm">{service.description}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-blue-700 text-white rounded-2xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      <section id="skills" className="py-24 sm:py-28 bg-slate-50 text-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="reveal flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
             <div>
-              <h3 className="text-2xl font-bold mb-2">
-                Looking for a practical web or AI solution?
-              </h3>
-              <p className="text-blue-100 leading-relaxed max-w-3xl">
-                I can help with small business tools, ecommerce workflows, dashboards, API
-                integrations, bug fixing and automation projects.
-              </p>
+              <p className="section-kicker">Technical profile</p>
+              <h2 className="section-title text-slate-950">Core stack & engineering capabilities.</h2>
             </div>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              <Send size={18} />
-              Start a conversation
-            </button>
+            <p className="text-slate-600 max-w-xl leading-relaxed">
+              Strongest around Vue/TypeScript + Laravel/PHP, with API integration, data-driven
+              workflows, debugging, QA and applied AI as complementary strengths.
+            </p>
           </div>
-        </div>
-      </section>
 
-      <section id="skills" className="py-20 bg-gray-950 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">Technical Skills</h2>
-          <div className="w-16 h-1 bg-blue-500 mx-auto mb-12"></div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-            {skills.map((skill, index) => (
+          <div className="reveal grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+            {coreSkills.map((skill) => (
               <div
                 key={skill.name}
-                className="text-center p-6 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300"
               >
-                <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-lg flex items-center justify-center p-2">
+                <div className="w-11 h-11 mx-auto mb-3 rounded-xl bg-slate-50 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                   <img src={skill.icon} alt={skill.name} className="w-full h-full object-contain" />
                 </div>
-                <div className="font-semibold text-sm sm:text-base">{skill.name}</div>
+                <div className="font-semibold text-sm">{skill.name}</div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            {[
-              {
-                icon: ShieldCheck,
-                title: 'Authentication',
-                text: 'JWT flows, protected routes and role-aware interfaces.'
-              },
-              {
-                icon: Server,
-                title: 'API Integration',
-                text: 'REST APIs, third-party data sources and frontend/backend communication.'
-              },
-              {
-                icon: Bot,
-                title: 'AI Workflows',
-                text: 'AI-assisted tools, chatbots and business automation ideas.'
-              }
-            ].map((item) => (
-              <div key={item.title} className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <item.icon className="text-blue-400 mb-4" size={28} />
-                <h3 className="font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-300 text-sm leading-relaxed">{item.text}</p>
+          <div className="reveal grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {capabilityGroups.map((group) => (
+              <div
+                key={group.title}
+                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-lg transition-shadow"
+              >
+                <div className="w-11 h-11 rounded-xl bg-slate-950 text-cyan-300 flex items-center justify-center mb-5">
+                  <group.icon size={21} />
+                </div>
+                <h3 className="font-bold text-lg mb-4">{group.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <span
+                      key={item}
+                      className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
+          </div>
+
+          <div className="reveal mt-6 rounded-3xl border border-dashed border-slate-300 bg-white/60 px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+            <Wrench size={21} className="text-slate-500 shrink-0" />
+            <p className="text-sm text-slate-600">
+              <strong className="text-slate-900">Additional working knowledge:</strong> AWS
+              fundamentals, Kubernetes fundamentals and CI/CD concepts. I treat these as areas of
+              familiarity rather than production-level expertise.
+            </p>
           </div>
         </div>
       </section>
 
-      <section id="projects" className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-4">
-            Selected Projects
-          </h2>
-          <div className="w-16 h-1 bg-blue-700 mx-auto mb-12"></div>
+      <section id="projects" className="py-24 sm:py-28 bg-white text-slate-950 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-[36rem] h-[36rem] bg-cyan-100/60 rounded-full blur-[140px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="reveal max-w-3xl mb-14">
+            <p className="section-kicker">Selected work</p>
+            <h2 className="section-title text-slate-950">Projects that show how I build.</h2>
+            <p className="text-slate-600 text-lg leading-relaxed mt-5">
+              A focused selection covering product architecture, full-stack development and applied
+              AI — with Nusa Creator Studio first because it best represents my current direction.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {projects.map((project) => (
-              <div
+          <div className="grid lg:grid-cols-3 gap-6">
+            {projects.map((project, index) => (
+              <article
                 key={project.title}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transform transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl"
+                className={`reveal group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${
+                  index === 0 ? 'lg:col-span-2' : ''
+                }`}
               >
-                <div className="h-48 relative overflow-hidden group">
-                  {project.image ? (
-                    <>
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
+                <div className={`${index === 0 ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-slate-950`}>
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/15 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${project.statusClass}`}>
+                      {project.status}
+                    </span>
+                  </div>
 
-                      {project.video && (
-                        <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedVideoProject(project)}
-                            className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors transform hover:scale-105"
-                          >
-                            <Play size={20} />
-                            <span>Watch Demo</span>
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="h-full bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center">
-                      <div className="text-center text-white p-6">
-                        <Code2 size={46} className="mx-auto mb-3" />
-                        <div className="font-semibold">Case Study Project</div>
-                      </div>
-                    </div>
+                  {project.video && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVideoProject(project)}
+                      className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 text-slate-950 flex items-center justify-center shadow-2xl opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
+                      aria-label={`Watch ${project.title} demo`}
+                    >
+                      <Play size={24} fill="currentColor" />
+                    </button>
                   )}
 
-                  <div className="absolute top-3 right-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Live Project
+                  <div className="absolute left-5 right-5 bottom-5 text-white">
+                    <h3 className={`${index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black`}>
+                      {project.title}
+                    </h3>
+                    <p className="text-sm text-slate-200 mt-1">{project.subtitle}</p>
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{project.title}</h3>
-                  <p className="text-blue-700 font-medium text-sm mb-3">{project.subtitle}</p>
-                  <p className="text-gray-600 mb-4 leading-relaxed text-sm">{project.description}</p>
+                <div className="p-6 sm:p-7">
+                  <p className="text-slate-600 leading-relaxed mb-5">{project.description}</p>
 
-                  <ul className="space-y-1 mb-5">
+                  <ul className="space-y-2 mb-6">
                     {project.highlights.map((highlight) => (
-                      <li key={highlight} className="text-sm text-gray-700 flex items-start gap-2">
+                      <li key={highlight} className="text-sm text-slate-700 flex items-start gap-2.5">
                         <CheckCircle size={15} className="text-emerald-500 mt-0.5 shrink-0" />
                         <span>{highlight}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <div className="flex flex-wrap gap-2 mb-5">
+                  <div className="flex flex-wrap gap-2 mb-6">
                     {project.tech.map((tech) => (
                       <span
                         key={tech}
-                        className="bg-gray-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
+                        className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-medium"
                       >
                         {tech}
                       </span>
                     ))}
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     {project.video && (
                       <button
                         type="button"
                         onClick={() => setSelectedVideoProject(project)}
-                        className="flex-1 bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 font-medium text-sm"
+                        className="inline-flex items-center gap-2 bg-slate-950 hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Play size={14} />
                         Video Demo
@@ -741,26 +870,22 @@ const App = () => {
                         href={project.code}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 border border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium text-sm"
+                        className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-950 hover:text-slate-950 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Github size={14} />
                         Code
                       </a>
                     )}
 
-                    {!project.video && !project.code && (
-                      <button
-                        type="button"
-                        onClick={() => scrollToSection('contact')}
-                        className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium text-sm"
-                      >
-                        <Mail size={14} />
-                        Ask for details
-                      </button>
+                    {!project.code && (
+                      <span className="inline-flex items-center gap-2 text-sm text-slate-500 px-1">
+                        <ShieldCheck size={14} />
+                        Private product
+                      </span>
                     )}
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
@@ -768,32 +893,33 @@ const App = () => {
 
       {selectedVideoProject && (
         <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-          onClick={closeVideoModal}
+          className="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[80] p-4"
+          onClick={() => setSelectedVideoProject(null)}
         >
           <div
-            className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {selectedVideoProject.title} - Demo
-              </h3>
+            <div className="flex justify-between items-center p-5 border-b border-white/10">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300 mb-1">Project demo</p>
+                <h3 className="text-lg font-bold text-white">{selectedVideoProject.title}</h3>
+              </div>
               <button
                 type="button"
-                onClick={closeVideoModal}
-                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+                onClick={() => setSelectedVideoProject(null)}
+                className="text-slate-400 hover:text-white w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center"
                 aria-label="Close video modal"
               >
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
 
-            <div className="p-4">
+            <div className="p-4 sm:p-5">
               <video
                 controls
                 autoPlay
-                className="w-full h-auto max-h-[70vh] rounded-lg"
+                className="w-full h-auto max-h-[68vh] rounded-2xl bg-black"
                 poster={selectedVideoProject.image}
               >
                 <source src={selectedVideoProject.video} type="video/mp4" />
@@ -801,23 +927,18 @@ const App = () => {
               </video>
             </div>
 
-            <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <p className="text-sm text-gray-600 mb-2">
-                  <strong>Technologies:</strong> {selectedVideoProject.tech.join(', ')}
-                </p>
-                <p className="text-sm text-gray-700">{selectedVideoProject.description}</p>
-              </div>
+            <div className="p-5 border-t border-white/10 bg-white/[0.03] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <p className="text-sm text-slate-300 max-w-3xl">{selectedVideoProject.description}</p>
 
               {selectedVideoProject.code && (
                 <a
                   href={selectedVideoProject.code}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-700 hover:text-blue-900 text-sm font-medium flex items-center gap-1 px-4 py-2 border border-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="text-cyan-300 hover:text-cyan-200 text-sm font-semibold flex items-center gap-2 whitespace-nowrap"
                 >
                   <Github size={16} />
-                  View on GitHub
+                  View repository
                 </a>
               )}
             </div>
@@ -825,229 +946,283 @@ const App = () => {
         </div>
       )}
 
-      <section id="contact" className="py-20 bg-gray-950 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">Contact</h2>
-          <div className="w-16 h-1 bg-blue-500 mx-auto mb-12"></div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section id="contact" className="py-24 sm:py-28 bg-slate-950 relative overflow-hidden">
+        <div className="absolute -right-40 bottom-0 w-[32rem] h-[32rem] bg-violet-600/10 rounded-full blur-[130px]" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="reveal grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16 items-start">
             <div>
-              <h3 className="text-2xl font-bold text-blue-400 mb-6">Let's build something useful</h3>
-              <p className="text-gray-300 mb-8 leading-relaxed">
-                Do you have a web project, ecommerce idea, automation need or remote opportunity?
-                I would be happy to hear from you.
+              <p className="section-kicker text-cyan-300">Contact</p>
+              <h2 className="section-title text-white">Let’s talk about the next product challenge.</h2>
+              <p className="text-slate-400 mt-5 leading-relaxed">
+                I am currently looking for full-time Software Engineer / Full-Stack opportunities,
+                especially in remote or international teams. I am also open to selected technical
+                collaborations.
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-3 mt-8">
                 {[
-                  { icon: Mail, title: 'Email', info: 'alvaromye@gmail.com' },
-                  { icon: Phone, title: 'Phone / WhatsApp', info: '+34 610 017 065' },
+                  { icon: Mail, title: 'Email', info: 'alvaromye@gmail.com', href: 'mailto:alvaromye@gmail.com' },
+                  { icon: Phone, title: 'Phone / WhatsApp', info: '+34 610 017 065', href: 'tel:+34610017065' },
                   {
                     icon: Linkedin,
                     title: 'LinkedIn',
-                    info: 'linkedin.com/in/alvaro-millan-estevez-27b814375'
+                    info: 'linkedin.com/in/alvaro-millan-estevez-27b814375',
+                    href: 'https://www.linkedin.com/in/alvaro-millan-estevez-27b814375'
                   },
-                  { icon: MapPin, title: 'Location', info: 'Indonesia / Spain - Remote available' }
+                  { icon: MapPin, title: 'Location', info: 'Indonesia / Spain · Remote', href: null }
                 ].map((contact) => (
-                  <div
-                    key={contact.title}
-                    className="flex items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors duration-200"
-                  >
-                    <div className="w-12 h-12 bg-blue-700 rounded-full flex items-center justify-center shrink-0">
-                      <contact.icon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white">{contact.title}</h4>
-                      <p className="text-gray-300 text-sm break-all">{contact.info}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-4 mt-8">
-                {[
-                  { icon: Github, href: 'https://github.com/AlvaroMillanEstevez', label: 'GitHub' },
-                  {
-                    icon: Linkedin,
-                    href: 'https://www.linkedin.com/in/alvaro-millan-estevez-27b814375',
-                    label: 'LinkedIn'
-                  },
-                  { icon: Mail, href: 'mailto:alvaromye@gmail.com', label: 'Email' }
-                ].map((social) => (
                   <a
-                    key={social.label}
-                    href={social.href}
-                    target={social.href.startsWith('mailto:') ? undefined : '_blank'}
-                    rel={social.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                    aria-label={social.label}
-                    className="w-12 h-12 bg-blue-700 hover:bg-blue-800 rounded-full flex items-center justify-center transition-all duration-200 hover:-translate-y-1"
+                    key={contact.title}
+                    href={contact.href || undefined}
+                    target={contact.href?.startsWith('http') ? '_blank' : undefined}
+                    rel={contact.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className={`flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${
+                      contact.href ? 'hover:bg-white/[0.07] hover:border-white/20 transition-all' : ''
+                    }`}
                   >
-                    <social.icon size={20} />
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] text-cyan-300 flex items-center justify-center shrink-0">
+                      <contact.icon size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-slate-500">{contact.title}</div>
+                      <div className="text-sm text-slate-200 break-all">{contact.info}</div>
+                    </div>
                   </a>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 relative">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 sm:p-8 relative shadow-2xl">
               {submitStatus && (
                 <div
-                  className={`absolute top-4 left-4 right-4 p-4 rounded-lg flex items-center gap-3 z-10 ${submitStatus === 'success'
-                    ? 'bg-green-500/20 border border-green-500/30 text-green-300'
-                    : 'bg-red-500/20 border border-red-500/30 text-red-300'
-                    }`}
+                  className={`mb-6 p-4 rounded-2xl flex items-center gap-3 ${
+                    submitStatus === 'success'
+                      ? 'bg-emerald-500/10 border border-emerald-400/20 text-emerald-200'
+                      : 'bg-red-500/10 border border-red-400/20 text-red-200'
+                  }`}
                 >
                   {submitStatus === 'success' ? (
                     <>
                       <CheckCircle size={20} />
-                      <span>Message sent successfully. I'll get back to you soon.</span>
+                      <span>Message sent successfully. I’ll get back to you soon.</span>
                     </>
                   ) : (
                     <>
                       <AlertCircle size={20} />
-                      <span>Error sending message. Please check the fields and try again.</span>
+                      <span>Please check the fields and try again.</span>
                     </>
                   )}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Your name *"
-                  required
-                  className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
-                />
-
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Your email *"
-                  required
-                  className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
-                />
-
-                <input
-                  type="text"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  placeholder="Subject *"
-                  required
-                  className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200"
-                />
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {[
+                  { name: 'name', type: 'text', placeholder: 'Your name *' },
+                  { name: 'email', type: 'email', placeholder: 'Your email *' },
+                  { name: 'subject', type: 'text', placeholder: 'Subject *' }
+                ].map((field) => (
+                  <input
+                    key={field.name}
+                    type={field.type}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleInputChange}
+                    placeholder={field.placeholder}
+                    required
+                    className="w-full p-4 bg-slate-950/45 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all"
+                  />
+                ))}
 
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
                   placeholder="Your message *"
-                  rows={5}
+                  rows={6}
                   required
-                  className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:bg-white/15 transition-all duration-200 resize-y"
+                  className="w-full p-4 bg-slate-950/45 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all resize-y"
                 />
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full py-4 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${isSubmitting
-                    ? 'bg-gray-600 cursor-not-allowed'
-                    : 'bg-blue-700 hover:bg-blue-800 transform hover:-translate-y-1'
-                    } text-white`}
+                  className={`w-full py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? 'bg-slate-700 cursor-not-allowed text-slate-400'
+                      : 'bg-white hover:bg-cyan-100 text-slate-950 hover:-translate-y-0.5'
+                  }`}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-slate-500 border-t-white rounded-full animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send size={20} />
+                      <Send size={18} />
                       Send Message
                     </>
                   )}
                 </button>
               </form>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-400 text-sm">
-                  Fields marked with * are required. If the form is not configured, your email app
-                  will open automatically.
-                </p>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="bg-black text-white py-8 text-center">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="mb-2">&copy; 2026 Álvaro Millán Estevez. All rights reserved.</p>
-          <p className="text-gray-400">Made with code, curiosity and practical problem-solving.</p>
+      <footer className="bg-black text-white border-t border-white/10 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-semibold">Álvaro Millán Estevez</p>
+            <p className="text-slate-500 text-sm mt-1">
+              Software engineering · product thinking · practical problem-solving
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/AlvaroMillanEstevez"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"
+              aria-label="GitHub"
+            >
+              <Github size={18} />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/alvaro-millan-estevez-27b814375"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={18} />
+            </a>
+            <a
+              href="mailto:alvaromye@gmail.com"
+              className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"
+              aria-label="Email"
+            >
+              <Mail size={18} />
+            </a>
+          </div>
         </div>
       </footer>
 
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+      <style>{`
+        html {
+          scroll-behavior: smooth;
         }
 
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
+        body {
+          background: #020617;
         }
 
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease forwards;
-        }
-
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .delay-200 {
-          animation-delay: 200ms;
-        }
-
-        .delay-300 {
-          animation-delay: 300ms;
-        }
-
-        .delay-400 {
-          animation-delay: 400ms;
-        }
-
-        .delay-500 {
-          animation-delay: 500ms;
-        }
-
-        .delay-1000 {
-          animation-delay: 1000ms;
-        }
-
-        .delay-2000 {
-          animation-delay: 2000ms;
+        .navbar {
+          background: rgba(2, 6, 23, 0.42);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
         }
 
         .navbar.scrolled {
-          background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+          background: rgba(2, 6, 23, 0.84);
+          border-color: rgba(255, 255, 255, 0.08);
+          box-shadow: 0 12px 45px rgba(2, 6, 23, 0.24);
+        }
+
+        .hero-grid {
+          background-image:
+            linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+          background-size: 48px 48px;
+          mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+          -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+        }
+
+        .subtle-grid {
+          background-image:
+            linear-gradient(rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+          background-size: 36px 36px;
+        }
+
+        .gradient-text {
+          background: linear-gradient(90deg, #67e8f9 0%, #60a5fa 48%, #c4b5fd 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+
+        .section-kicker {
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          font-size: 0.75rem;
+          line-height: 1rem;
+          font-weight: 800;
+          color: #2563eb;
+          margin-bottom: 0.9rem;
+        }
+
+        .section-title {
+          font-size: clamp(2rem, 5vw, 3.75rem);
+          line-height: 1.02;
+          letter-spacing: -0.035em;
+          font-weight: 900;
+        }
+
+        .reveal {
+          opacity: 0;
+          transform: translateY(24px);
+          transition:
+            opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        @keyframes orbitSlow {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          50% {
+            transform: translate3d(55px, 35px, 0) scale(1.08);
+          }
+        }
+
+        @keyframes orbitReverse {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          50% {
+            transform: translate3d(-45px, 25px, 0) scale(1.06);
+          }
+        }
+
+        .animate-orbit-slow {
+          animation: orbitSlow 14s ease-in-out infinite;
+        }
+
+        .animate-orbit-reverse {
+          animation: orbitReverse 17s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+
+          .reveal {
+            opacity: 1;
+            transform: none;
+          }
         }
       `}</style>
     </div>
