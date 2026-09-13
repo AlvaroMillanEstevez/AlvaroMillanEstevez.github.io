@@ -9,14 +9,12 @@ import {
   Code2,
   Database,
   Download,
-  ExternalLink,
   FileText,
   Github,
   Globe2,
   Linkedin,
   Mail,
   MapPin,
-  Menu,
   Phone,
   Play,
   Send,
@@ -31,10 +29,11 @@ import {
 } from 'lucide-react';
 
 const App = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [activeSection, setActiveSection] = useState('home');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -66,6 +65,14 @@ const App = () => {
     { label: 'Contact', id: 'contact' }
   ];
 
+  const mobileNavigationItems = [
+    { label: 'About', id: 'about' },
+    { label: 'Experience', id: 'experience' },
+    { label: 'Skills', id: 'skills' },
+    { label: 'Projects', id: 'projects' },
+    { label: 'Contact', id: 'contact' }
+  ];
+
   useEffect(() => {
     if (!EMAILJS_CONFIG.PUBLIC_KEY) return;
 
@@ -90,16 +97,12 @@ const App = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const navbar = document.querySelector('.navbar');
       const scrollTop = window.scrollY;
       const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = documentHeight > 0 ? (scrollTop / documentHeight) * 100 : 0;
 
       setScrollProgress(Math.min(100, Math.max(0, progress)));
-
-      if (navbar) {
-        navbar.classList.toggle('scrolled', scrollTop > 40);
-      }
+      setScrollOffset(scrollTop);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -134,11 +137,38 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const sections = navigationItems
+      .map((item) => document.getElementById(item.id))
+      .filter(Boolean);
+
+    if (!('IntersectionObserver' in window)) return undefined;
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (visibleEntry?.target?.id) {
+          setActiveSection(visibleEntry.target.id);
+        }
+      },
+      {
+        rootMargin: '-30% 0px -55% 0px',
+        threshold: [0, 0.15, 0.35, 0.6]
+      }
+    );
+
+    sections.forEach((section) => sectionObserver.observe(section));
+
+    return () => sectionObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setSelectedVideoProject(null);
         setIsCvMenuOpen(false);
-        setIsMenuOpen(false);
       }
     };
 
@@ -150,11 +180,29 @@ const App = () => {
     const element = document.getElementById(sectionId);
 
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const headerOffset = window.innerWidth < 1024 ? 64 : 80;
+      const targetTop =
+        element.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth'
+      });
     }
 
-    setIsMenuOpen(false);
     setIsCvMenuOpen(false);
+  };
+
+  const handleCardPointerMove = (event) => {
+    if (typeof window === 'undefined' || !window.matchMedia('(pointer: fine)').matches) {
+      return;
+    }
+
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+
+    card.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`);
+    card.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);
   };
 
   const handleInputChange = (event) => {
@@ -308,7 +356,7 @@ const App = () => {
       title: 'Nusa Creator Studio',
       subtitle: 'AI-powered SaaS for social-commerce content workflows.',
       status: 'In development',
-      statusClass: 'bg-amber-400/90 text-slate-950',
+      statusClass: 'bg-amber-400/90 text-slate-900',
       description:
         'Independent full-stack SaaS product built around AI-assisted content generation, structured workflows and subscription-style product rules.',
       highlights: [
@@ -326,7 +374,7 @@ const App = () => {
       title: 'AI / RAG Knowledge Assistant',
       subtitle: 'Document-grounded assistant with retrieval and source-aware responses.',
       status: 'Prototype',
-      statusClass: 'bg-violet-400/90 text-slate-950',
+      statusClass: 'bg-violet-400/90 text-slate-900',
       description:
         'RAG application designed to answer questions using private or business-specific documentation instead of relying only on general LLM knowledge.',
       highlights: [
@@ -344,7 +392,7 @@ const App = () => {
       title: 'E-commerce Admin Dashboard',
       subtitle: 'Full-stack administration panel for products, orders and users.',
       status: 'Demo',
-      statusClass: 'bg-emerald-400/90 text-slate-950',
+      statusClass: 'bg-emerald-400/90 text-slate-900',
       description:
         'Full-stack dashboard focused on authenticated management flows, API integration, reusable UI components and responsive administration screens.',
       highlights: [
@@ -379,41 +427,76 @@ const App = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-300 selection:text-slate-950">
+    <div className="min-h-screen bg-[#020617] text-slate-100 selection:bg-cyan-300 selection:text-slate-900">
       <div
         className="fixed top-0 left-0 z-[70] h-[3px] bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-[width] duration-100"
         style={{ width: `${scrollProgress}%` }}
       />
 
-      <nav className="navbar fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <header className="portfolio-fixed-header">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center h-full gap-2 lg:gap-4">
             <button
               onClick={() => scrollToSection('home')}
-              className="group flex items-center gap-3"
-              aria-label="Go to home"
+              className="brand-logo group shrink-0 flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70"
+              aria-label="Back to home"
+              title="Back to home"
             >
-              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-                AM
+              <span className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shadow-lg shadow-cyan-500/10 overflow-hidden">
+                <img
+                  src="/favicon.ico"
+                  alt=""
+                  aria-hidden="true"
+                  className="w-7 h-7 md:w-8 md:h-8 object-contain"
+                />
               </span>
-              <span className="hidden sm:block text-sm font-semibold tracking-wide text-white">
+
+              <span className="hidden md:block text-sm font-semibold tracking-wide text-white group-hover:text-cyan-200 transition-colors whitespace-nowrap">
                 Álvaro Millán Estevez
               </span>
             </button>
 
-            <div className="hidden lg:flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-xl">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="px-4 py-2 rounded-full text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-all"
-                >
-                  {item.label}
-                </button>
-              ))}
+            {/* Mobile/tablet: the logo is Home; the remaining sections fit on one row. */}
+            <div className="lg:hidden flex-1 min-w-0">
+              <div className="mobile-primary-nav flex items-center justify-start gap-0.5">
+                {mobileNavigationItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    aria-label={item.ariaLabel || item.label}
+                    title={item.ariaLabel || item.label}
+                    className={`mobile-nav-button min-w-0 px-1.5 py-1.5 rounded-lg text-[9px] min-[360px]:text-[10px] min-[390px]:text-[11px] sm:text-xs font-semibold tracking-[-0.01em] transition-all duration-300 ${
+                      activeSection === item.id
+                        ? 'bg-cyan-400/15 text-cyan-200 border border-cyan-300/25'
+                        : 'text-slate-300 border border-transparent hover:text-white hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="hidden lg:flex items-center gap-3">
+            {/* Desktop navigation. */}
+            <div className="hidden lg:flex flex-1 justify-center">
+              <div className="flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-xl">
+                {navigationItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ${
+                      activeSection === item.id
+                        ? 'text-white bg-white/10 shadow-inner shadow-white/5'
+                        : 'text-slate-300 hover:text-white hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-2 shrink-0">
               <a
                 href="https://github.com/AlvaroMillanEstevez"
                 target="_blank"
@@ -423,42 +506,21 @@ const App = () => {
               >
                 <Github size={18} />
               </a>
+
               <button
                 onClick={() => scrollToSection('contact')}
-                className="px-4 py-2 rounded-xl bg-white text-slate-950 text-sm font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5"
+                className="inline-flex px-4 py-2 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5"
               >
                 Contact
               </button>
             </div>
-
-            <button
-              onClick={() => setIsMenuOpen((value) => !value)}
-              className="lg:hidden w-10 h-10 rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center"
-              aria-label="Toggle navigation menu"
-            >
-              {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
-            </button>
           </div>
-
-          {isMenuOpen && (
-            <div className="lg:hidden absolute top-16 left-4 right-4 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-2xl p-3">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="block px-4 py-3 rounded-xl text-slate-200 hover:bg-white/10 w-full text-left transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-      </nav>
+      </header>
 
       <section
         id="home"
-        className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16"
+        className="relative z-10 min-h-screen flex items-center overflow-x-hidden overflow-y-visible pt-24 lg:pt-24 pb-20"
       >
         <div className="absolute inset-0 hero-grid opacity-30 pointer-events-none" />
         <div className="absolute -top-40 -left-28 w-[34rem] h-[34rem] rounded-full bg-cyan-500/20 blur-[120px] animate-orbit-slow pointer-events-none" />
@@ -507,7 +569,7 @@ const App = () => {
               <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                 <button
                   onClick={() => scrollToSection('experience')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-950 px-6 py-3.5 font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5 shadow-xl shadow-black/10"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-900 px-6 py-3.5 font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5 shadow-xl shadow-black/10"
                 >
                   View Experience
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -528,7 +590,7 @@ const App = () => {
                   </button>
 
                   {isCvMenuOpen && (
-                    <div className="absolute z-30 mt-2 w-full min-w-[220px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-2">
+                    <div className="absolute z-[70] mt-2 w-full min-w-[240px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-2">
                       <a
                         href={cvFiles.en}
                         download="alvaro_millan_fullstack_en_photo.docx"
@@ -569,27 +631,31 @@ const App = () => {
 
             <div className="reveal relative max-w-md mx-auto lg:max-w-none w-full">
               <div className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-br from-cyan-400/30 via-blue-500/10 to-violet-500/30 blur-2xl scale-95" />
-              <div className="relative rounded-[2.25rem] border border-white/15 bg-white/[0.06] backdrop-blur-xl p-4 shadow-2xl">
+              <div
+                className="premium-card hero-portrait-card relative rounded-[2.25rem] border border-white/15 bg-white/[0.06] backdrop-blur-xl p-4 shadow-2xl transition-transform duration-200"
+                onMouseMove={handleCardPointerMove}
+                style={{ transform: `translate3d(0, ${Math.min(scrollOffset * 0.025, 18)}px, 0)` }}
+              >
                 <div className="rounded-[1.75rem] overflow-hidden bg-slate-900 aspect-[4/5]">
                   <img
                     src="/assets/AlvaroMillanEstevez2.jpg"
                     alt="Álvaro Millán Estevez"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mt-4">
-                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/55 p-4">
                     <div className="text-2xl font-black text-white">200+</div>
                     <div className="text-xs text-slate-400 mt-1">issues investigated / resolved</div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/55 p-4">
                     <div className="text-2xl font-black text-white">Full-Stack</div>
                     <div className="text-xs text-slate-400 mt-1">development + technical QA</div>
                   </div>
                 </div>
 
-                <div className="mt-3 rounded-2xl border border-white/10 bg-slate-950/50 p-4 flex items-center gap-3">
+                <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/55 p-4 flex items-center gap-3">
                   <Globe2 size={19} className="text-cyan-300 shrink-0" />
                   <div>
                     <div className="text-sm font-semibold text-white">Spain / Indonesia</div>
@@ -607,13 +673,13 @@ const App = () => {
         </div>
       </section>
 
-      <section id="about" className="relative py-24 sm:py-28 bg-white text-slate-950 overflow-hidden">
+      <section id="about" className="scroll-mt-32 lg:scroll-mt-20 relative py-24 sm:py-28 bg-white text-slate-900 overflow-hidden max-w-full">
         <div className="absolute inset-0 subtle-grid pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="reveal grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16 items-start">
             <div>
               <p className="section-kicker">About</p>
-              <h2 className="section-title text-slate-950">
+              <h2 className="section-title text-slate-900">
                 Engineering with a
                 <span className="block text-blue-700">business perspective.</span>
               </h2>
@@ -632,15 +698,17 @@ const App = () => {
               </p>
 
               <div className="grid sm:grid-cols-3 gap-4">
-                {strengths.map((strength) => (
+                {strengths.map((strength, index) => (
                   <div
                     key={strength.title}
-                    className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    className="reveal premium-card group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300"
+                    onMouseMove={handleCardPointerMove}
+                    style={{ '--reveal-delay': `${index * 80}ms` }}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-slate-950 text-cyan-300 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <div className="w-11 h-11 rounded-xl bg-[#020617] text-cyan-300 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                       <strength.icon size={20} />
                     </div>
-                    <h3 className="font-bold text-slate-950 mb-2">{strength.title}</h3>
+                    <h3 className="font-bold text-slate-900 mb-2">{strength.title}</h3>
                     <p className="text-sm text-slate-600 leading-relaxed">{strength.text}</p>
                   </div>
                 ))}
@@ -650,7 +718,7 @@ const App = () => {
         </div>
       </section>
 
-      <section id="experience" className="py-24 sm:py-28 bg-slate-950 relative overflow-hidden">
+      <section id="experience" className="scroll-mt-32 lg:scroll-mt-20 py-24 sm:py-28 bg-[#020617] relative overflow-hidden">
         <div className="absolute -left-40 top-28 w-96 h-96 rounded-full bg-blue-600/10 blur-[120px]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="reveal max-w-3xl mb-14">
@@ -666,16 +734,20 @@ const App = () => {
             <div className="absolute left-[21px] sm:left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-cyan-400/70 via-blue-500/40 to-transparent" />
 
             <div className="space-y-6">
-              {experiences.map((experience) => (
+              {experiences.map((experience, index) => (
                 <article
                   key={`${experience.company}-${experience.role}`}
                   className="reveal relative pl-14 sm:pl-20"
+                  style={{ '--reveal-delay': `${index * 90}ms` }}
                 >
                   <div className="absolute left-0 top-5 w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-white/10 text-cyan-300 flex items-center justify-center shadow-xl">
                     <experience.icon size={21} />
                   </div>
 
-                  <div className="group rounded-3xl border border-white/10 bg-white/[0.045] hover:bg-white/[0.065] p-6 sm:p-8 transition-all duration-300 hover:border-cyan-300/20">
+                  <div
+                    className="premium-card group rounded-3xl border border-white/10 bg-white/[0.045] hover:bg-white/[0.065] p-6 sm:p-8 transition-all duration-300 hover:border-cyan-300/20"
+                    onMouseMove={handleCardPointerMove}
+                  >
                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
                       <div>
                         <h3 className="text-xl sm:text-2xl font-bold text-white">{experience.role}</h3>
@@ -716,12 +788,12 @@ const App = () => {
         </div>
       </section>
 
-      <section id="skills" className="py-24 sm:py-28 bg-slate-50 text-slate-950">
+      <section id="skills" className="scroll-mt-32 lg:scroll-mt-20 py-24 sm:py-28 bg-slate-50 text-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="reveal flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
             <div>
               <p className="section-kicker">Technical profile</p>
-              <h2 className="section-title text-slate-950">Core stack & engineering capabilities.</h2>
+              <h2 className="section-title text-slate-900">Core stack & engineering capabilities.</h2>
             </div>
             <p className="text-slate-600 max-w-xl leading-relaxed">
               Strongest around Vue/TypeScript + Laravel/PHP, with API integration, data-driven
@@ -730,10 +802,12 @@ const App = () => {
           </div>
 
           <div className="reveal grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
-            {coreSkills.map((skill) => (
+            {coreSkills.map((skill, index) => (
               <div
                 key={skill.name}
-                className="group rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300"
+                className="reveal premium-card group rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm transition-all duration-300"
+                onMouseMove={handleCardPointerMove}
+                style={{ '--reveal-delay': `${index * 55}ms` }}
               >
                 <div className="w-11 h-11 mx-auto mb-3 rounded-xl bg-slate-50 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                   <img src={skill.icon} alt={skill.name} className="w-full h-full object-contain" />
@@ -744,12 +818,14 @@ const App = () => {
           </div>
 
           <div className="reveal grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {capabilityGroups.map((group) => (
+            {capabilityGroups.map((group, index) => (
               <div
                 key={group.title}
-                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-lg transition-shadow"
+                className="reveal premium-card rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300"
+                onMouseMove={handleCardPointerMove}
+                style={{ '--reveal-delay': `${index * 80}ms` }}
               >
-                <div className="w-11 h-11 rounded-xl bg-slate-950 text-cyan-300 flex items-center justify-center mb-5">
+                <div className="w-11 h-11 rounded-xl bg-[#020617] text-cyan-300 flex items-center justify-center mb-5">
                   <group.icon size={21} />
                 </div>
                 <h3 className="font-bold text-lg mb-4">{group.title}</h3>
@@ -778,12 +854,12 @@ const App = () => {
         </div>
       </section>
 
-      <section id="projects" className="py-24 sm:py-28 bg-white text-slate-950 relative overflow-hidden">
+      <section id="projects" className="scroll-mt-32 lg:scroll-mt-20 py-24 sm:py-28 bg-white text-slate-900 relative overflow-hidden max-w-full">
         <div className="absolute right-0 top-0 w-[36rem] h-[36rem] bg-cyan-100/60 rounded-full blur-[140px] pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="reveal max-w-3xl mb-14">
             <p className="section-kicker">Selected work</p>
-            <h2 className="section-title text-slate-950">Projects that show how I build.</h2>
+            <h2 className="section-title text-slate-900">Projects that show how I build.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mt-5">
               A focused selection covering product architecture, full-stack development and applied
               AI — with Nusa Creator Studio first because it best represents my current direction.
@@ -794,17 +870,19 @@ const App = () => {
             {projects.map((project, index) => (
               <article
                 key={project.title}
-                className={`reveal group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${
+                className={`reveal premium-card project-card group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-500 ${
                   index === 0 ? 'lg:col-span-2' : ''
                 }`}
+                onMouseMove={handleCardPointerMove}
+                style={{ '--reveal-delay': `${index * 100}ms` }}
               >
-                <div className={`${index === 0 ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-slate-950`}>
+                <div className={`${index === 0 ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-[#020617]`}>
                   <img
                     src={project.image}
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/15 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
                   <div className="absolute top-4 left-4">
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${project.statusClass}`}>
                       {project.status}
@@ -815,22 +893,23 @@ const App = () => {
                     <button
                       type="button"
                       onClick={() => setSelectedVideoProject(project)}
-                      className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 text-slate-950 flex items-center justify-center shadow-2xl opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
+                      className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/95 text-slate-900 flex items-center justify-center shadow-2xl opacity-100 scale-100 group-hover:scale-110 group-hover:bg-cyan-100 transition-all duration-300 ring-1 ring-black/5"
                       aria-label={`Watch ${project.title} demo`}
                     >
                       <Play size={24} fill="currentColor" />
                     </button>
                   )}
 
-                  <div className="absolute left-5 right-5 bottom-5 text-white">
-                    <h3 className={`${index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black`}>
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-slate-200 mt-1">{project.subtitle}</p>
-                  </div>
                 </div>
 
                 <div className="p-6 sm:p-7">
+                  <div className="mb-4">
+                    <h3 className={`${index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black text-slate-900`}>
+                      {project.title}
+                    </h3>
+                    <p className="text-blue-700 font-semibold text-sm mt-1.5">{project.subtitle}</p>
+                  </div>
+
                   <p className="text-slate-600 leading-relaxed mb-5">{project.description}</p>
 
                   <ul className="space-y-2 mb-6">
@@ -858,7 +937,7 @@ const App = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedVideoProject(project)}
-                        className="inline-flex items-center gap-2 bg-slate-950 hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                        className="inline-flex items-center gap-2 bg-[#020617] hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Play size={14} />
                         Video Demo
@@ -870,7 +949,7 @@ const App = () => {
                         href={project.code}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-950 hover:text-slate-950 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                        className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Github size={14} />
                         Code
@@ -893,7 +972,7 @@ const App = () => {
 
       {selectedVideoProject && (
         <div
-          className="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[80] p-4"
+          className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[80] p-4"
           onClick={() => setSelectedVideoProject(null)}
         >
           <div
@@ -946,7 +1025,7 @@ const App = () => {
         </div>
       )}
 
-      <section id="contact" className="py-24 sm:py-28 bg-slate-950 relative overflow-hidden">
+      <section id="contact" className="scroll-mt-32 lg:scroll-mt-20 py-24 sm:py-28 bg-[#020617] relative overflow-hidden">
         <div className="absolute -right-40 bottom-0 w-[32rem] h-[32rem] bg-violet-600/10 rounded-full blur-[130px]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="reveal grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16 items-start">
@@ -992,7 +1071,10 @@ const App = () => {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 sm:p-8 relative shadow-2xl">
+            <div
+              className="premium-card rounded-[2rem] border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 sm:p-8 relative shadow-2xl"
+              onMouseMove={handleCardPointerMove}
+            >
               {submitStatus && (
                 <div
                   className={`mb-6 p-4 rounded-2xl flex items-center gap-3 ${
@@ -1029,7 +1111,7 @@ const App = () => {
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
                     required
-                    className="w-full p-4 bg-slate-950/45 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all"
+                    className="w-full p-4 bg-slate-900/55 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all"
                   />
                 ))}
 
@@ -1040,7 +1122,7 @@ const App = () => {
                   placeholder="Your message *"
                   rows={6}
                   required
-                  className="w-full p-4 bg-slate-950/45 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all resize-y"
+                  className="w-full p-4 bg-slate-900/55 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all resize-y"
                 />
 
                 <button
@@ -1049,7 +1131,7 @@ const App = () => {
                   className={`w-full py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
                     isSubmitting
                       ? 'bg-slate-700 cursor-not-allowed text-slate-400'
-                      : 'bg-white hover:bg-cyan-100 text-slate-950 hover:-translate-y-0.5'
+                      : 'bg-white hover:bg-cyan-100 text-slate-900 hover:-translate-y-0.5'
                   }`}
                 >
                   {isSubmitting ? (
@@ -1116,18 +1198,101 @@ const App = () => {
 
         body {
           background: #020617;
+          color: #e2e8f0;
         }
 
-        .navbar {
-          background: rgba(2, 6, 23, 0.42);
+        .portfolio-fixed-header {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+          overflow-x: hidden !important;
+          height: 64px;
+          z-index: 9999 !important;
+          margin: 0 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          transform: none !important;
+          translate: none !important;
+          background: rgba(2, 6, 23, 0.96);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 10px 34px rgba(2, 6, 23, 0.18);
           backdrop-filter: blur(18px);
           -webkit-backdrop-filter: blur(18px);
+          backface-visibility: visible !important;
+          -webkit-backface-visibility: visible !important;
+          contain: none !important;
         }
 
-        .navbar.scrolled {
-          background: rgba(2, 6, 23, 0.84);
-          border-color: rgba(255, 255, 255, 0.08);
-          box-shadow: 0 12px 45px rgba(2, 6, 23, 0.24);
+        .mobile-primary-nav {
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          overflow: hidden;
+          padding: 1px 0;
+          white-space: nowrap;
+        }
+
+        .mobile-nav-button {
+          min-height: 32px;
+          white-space: nowrap;
+          flex: 0 1 auto;
+          max-width: max-content;
+        }
+
+        .brand-logo {
+          width: auto;
+          min-width: 0;
+          max-width: none;
+          overflow: visible;
+        }
+
+        .brand-logo > span:first-child {
+          flex: 0 0 auto;
+        }
+
+        @media (max-width: 767px) {
+          .portfolio-fixed-header {
+            height: 60px;
+          }
+
+          .brand-logo {
+            width: 38px;
+            min-width: 38px;
+            max-width: 38px;
+            margin-right: 2px;
+          }
+
+          .brand-logo > span:first-child {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+          }
+
+          .mobile-nav-button {
+            min-height: 30px;
+          }
+        }
+
+        @media (max-width: 350px) {
+          .mobile-nav-button {
+            font-size: 8.5px;
+            padding-left: 4px;
+            padding-right: 4px;
+          }
+
+          .brand-logo {
+            width: 34px;
+            min-width: 34px;
+            max-width: 34px;
+          }
+
+          .brand-logo > span:first-child {
+            width: 32px;
+            height: 32px;
+          }
         }
 
         .hero-grid {
@@ -1172,15 +1337,97 @@ const App = () => {
 
         .reveal {
           opacity: 0;
-          transform: translateY(24px);
+          transform: translateY(28px) scale(0.992);
+          filter: blur(3px);
           transition:
-            opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-            transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+            opacity 760ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 760ms cubic-bezier(0.22, 1, 0.36, 1),
+            filter 760ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition-delay: var(--reveal-delay, 0ms);
         }
 
         .reveal.is-visible {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
+
+        .brand-logo > span:first-child {
+          transition:
+            transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 420ms ease,
+            border-color 420ms ease;
+        }
+
+        .brand-logo:hover > span:first-child {
+          transform: translateY(-1px) rotate(-4deg) scale(1.06);
+          border-color: rgba(103, 232, 249, 0.35);
+          box-shadow: 0 12px 30px rgba(34, 211, 238, 0.16);
+        }
+
+        .brand-logo img {
+          transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .brand-logo:hover img {
+          transform: scale(1.06);
+        }
+
+        .premium-card {
+          --mouse-x: 50%;
+          --mouse-y: 50%;
+          position: relative;
+          isolation: isolate;
+          transform-style: preserve-3d;
+        }
+
+        .premium-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background:
+            radial-gradient(
+              420px circle at var(--mouse-x) var(--mouse-y),
+              rgba(34, 211, 238, 0.11),
+              rgba(96, 165, 250, 0.045) 28%,
+              transparent 62%
+            );
+          opacity: 0;
+          transition: opacity 350ms ease;
+          z-index: 4;
+        }
+
+        .hero-portrait-card::after {
+          background:
+            radial-gradient(
+              360px circle at var(--mouse-x) var(--mouse-y),
+              rgba(103, 232, 249, 0.15),
+              rgba(139, 92, 246, 0.055) 32%,
+              transparent 64%
+            );
+        }
+
+        .project-card {
+          will-change: transform, box-shadow;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .premium-card:hover::after {
+            opacity: 1;
+          }
+
+          .project-card:hover {
+            transform: translateY(-8px) scale(1.006);
+            box-shadow:
+              0 28px 70px rgba(15, 23, 42, 0.14),
+              0 0 0 1px rgba(59, 130, 246, 0.05);
+          }
+
+          .premium-card:not(.project-card):hover {
+            transform: translateY(-4px);
+          }
         }
 
         @keyframes orbitSlow {
@@ -1209,6 +1456,32 @@ const App = () => {
           animation: orbitReverse 17s ease-in-out infinite;
         }
 
+        @keyframes softFloat {
+          0%, 100% {
+            translate: 0 0;
+          }
+          50% {
+            translate: 0 -6px;
+          }
+        }
+
+        .hero-portrait-card {
+          animation: softFloat 7s ease-in-out infinite;
+        }
+
+        .project-card img {
+          transition:
+            transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+            filter 500ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .project-card:hover img {
+            transform: scale(1.055);
+            filter: saturate(1.04) contrast(1.02);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -1222,7 +1495,18 @@ const App = () => {
           .reveal {
             opacity: 1;
             transform: none;
+            filter: none;
           }
+
+          .hero-portrait-card {
+            animation: none;
+          }
+
+          .premium-card,
+          .project-card {
+            transform: none !important;
+          }
+
         }
       `}</style>
     </div>
