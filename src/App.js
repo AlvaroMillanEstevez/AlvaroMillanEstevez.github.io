@@ -6,10 +6,14 @@ import {
   Briefcase,
   CheckCircle,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Code2,
   Database,
   Download,
+  ExternalLink,
   FileText,
+  Gamepad2,
   Github,
   Globe2,
   Linkedin,
@@ -48,6 +52,7 @@ const navigationItems = [
 const App = () => {
   const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
+  const [selectedGallery, setSelectedGallery] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [activeSection, setActiveSection] = useState('home');
@@ -69,8 +74,8 @@ const App = () => {
   };
 
   const cvFiles = {
-    en: '/assets/alvaro_millan_fullstack_en_photo.docx',
-    es: '/assets/alvaro_millan_fullstack_es_photo.docx'
+    en: '/assets/alvaro_millan_fullstack_en.pdf',
+    es: '/assets/alvaro_millan_fullstack_es.pdf'
   };
 
   useEffect(() => {
@@ -168,7 +173,18 @@ const App = () => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setSelectedVideoProject(null);
+        setSelectedGallery(null);
         setIsCvMenuOpen(false);
+      }
+
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const step = event.key === 'ArrowLeft' ? -1 : 1;
+
+        setSelectedGallery((gallery) => {
+          if (!gallery) return gallery;
+          const total = gallery.project.screenshots.length;
+          return { ...gallery, index: (gallery.index + step + total) % total };
+        });
       }
     };
 
@@ -269,7 +285,7 @@ const App = () => {
 
   const experiences = [
     {
-      period: '2025 — Present',
+      period: 'Jun 2025 — Present',
       role: 'Software Developer & Technical QA',
       company: 'Confidential Software Product',
       meta: 'Freelance · Part-time',
@@ -337,38 +353,53 @@ const App = () => {
     {
       icon: TestTube2,
       title: 'Quality & Debugging',
-      items: ['Technical QA', 'Regression testing', 'API validation', 'Root-cause debugging', 'End-to-end flows']
+      items: ['Technical QA', 'Regression testing', 'API validation', 'Root-cause debugging', 'End-to-end flows', 'Vitest']
     },
     {
       icon: Bot,
       title: 'Applied AI',
-      items: ['OpenAI API', 'Claude API', 'RAG', 'LLM workflows', 'Dynamic prompts', 'AI-assisted automation']
+      items: ['OpenAI API', 'Claude API', 'RAG', 'LLM workflows', 'Agentic development (Claude Code)', 'AI-generated assets']
     },
     {
       icon: Terminal,
       title: 'Engineering Workflow',
       items: ['Git / GitHub', 'Docker Compose', 'Linux', 'Vite', 'NPM', 'Composer']
+    },
+    {
+      icon: Gamepad2,
+      title: 'Game Development',
+      items: ['Phaser 4', 'TypeScript game logic', 'Level generation', 'Simulation & balancing', 'Web Audio', 'Touch + desktop input']
     }
   ];
 
   const projects = [
     {
-      title: 'Nusa Creator Studio',
-      subtitle: 'AI-powered SaaS for social-commerce content workflows.',
-      status: 'In development',
-      statusClass: 'bg-amber-400/90 text-slate-900',
+      title: 'Nusa: Warung Sort',
+      subtitle: 'Published web puzzle game set in an Indonesian street-food stall.',
+      status: 'Published game',
+      statusClass: 'bg-cyan-300/90 text-slate-900',
+      featured: true,
       description:
-        'Independent full-stack SaaS product built around AI-assisted content generation, structured workflows and subscription-style product rules.',
+        'Complete triple-match sorting game designed, built and published as a solo developer — from game design and architecture to testing, art direction and release on web game portals.',
       highlights: [
-        'Laravel REST API + Vue 3 / TypeScript frontend',
-        'Projects, generation history, credits and plan-based feature gating',
-        'Decoupled AI providers and dynamic prompts',
-        'API/frontend tests including ownership, credit rules and multilingual inputs'
+        'Framework-free TypeScript game core, tested with Vitest; Phaser 4 scenes only render state',
+        '50 levels built by a recipe-based level generator and balanced with a simulated player',
+        'Own mechanics: fresh-food countdowns, Javanese market days and a bilingual collection book',
+        'Agentic AI coding and AI-generated assets, with every result reviewed, debugged and validated',
+        'Optimised production build (under 11 MB), EN/ID i18n and desktop + mobile layouts'
       ],
-      tech: ['Vue 3', 'TypeScript', 'Laravel', 'Pinia', 'Tailwind CSS', 'REST APIs', 'AI'],
-      code: null,
-      image: 'assets/demoNusaCreatorStudio.png',
-      video: 'assets/videos/videoDemoNusaCreatorStudio.mp4'
+      tech: ['TypeScript', 'Phaser 4', 'Vite', 'Vitest', 'Web Audio', 'Python tooling', 'Agentic AI'],
+      code: 'https://github.com/AlvaroMillanEstevez/nusa-sorting',
+      demo: 'https://kokeskill.itch.io/nusa-warung-sort',
+      demoLabel: 'Play on itch.io',
+      image: 'assets/screenshot-3-belt-combo.png',
+      video: 'assets/videos/warungsortvideo.mp4',
+      screenshots: [
+        { src: 'assets/screenshot-3-belt-combo.png', caption: 'Night market level: conveyor belts and a x5 combo' },
+        { src: 'assets/screenshot-1-fresh-food.png', caption: 'Fresh food with a move countdown before it spoils' },
+        { src: 'assets/screenshot-2-budaya-jawa.png', caption: 'Javanese culture themed island' },
+        { src: 'assets/screenshot-4-island-map.png', caption: 'Illustrated island map with 50 levels' }
+      ]
     },
     {
       title: 'AI / RAG Knowledge Assistant',
@@ -387,6 +418,25 @@ const App = () => {
       code: 'https://github.com/AlvaroMillanEstevez/rag-chatbot-agent',
       image: 'assets/RAGChatbot.png',
       video: 'assets/videos/RagChatbotPorfolio.mp4'
+    },
+    {
+      title: 'Nusa Creator Studio',
+      subtitle: 'AI-powered SaaS for social-commerce content workflows.',
+      status: 'In development',
+      statusClass: 'bg-amber-400/90 text-slate-900',
+      featured: true,
+      description:
+        'Independent full-stack SaaS product built around AI-assisted content generation, structured workflows and subscription-style product rules.',
+      highlights: [
+        'Laravel REST API + Vue 3 / TypeScript frontend',
+        'Projects, generation history, credits and plan-based feature gating',
+        'Decoupled AI providers and dynamic prompts',
+        'API/frontend tests including ownership, credit rules and multilingual inputs'
+      ],
+      tech: ['Vue 3', 'TypeScript', 'Laravel', 'Pinia', 'Tailwind CSS', 'REST APIs', 'AI'],
+      code: null,
+      image: 'assets/demoNusaCreatorStudio.png',
+      video: 'assets/videos/videoDemoNusaCreatorStudio.mp4'
     },
     {
       title: 'E-commerce Admin Dashboard',
@@ -550,11 +600,12 @@ const App = () => {
               <p className="text-lg sm:text-xl text-slate-300 leading-relaxed max-w-3xl mb-8">
                 I build and improve web products with Vue, TypeScript, Laravel and REST APIs —
                 combining software development, technical QA, root-cause debugging and practical AI
-                integration with a strong understanding of business needs.
+                integration with a strong understanding of business needs. I have also designed and
+                published my own web game with TypeScript and Phaser.
               </p>
 
               <div className="flex flex-wrap gap-2.5 mb-9">
-                {['Vue 3', 'TypeScript', 'Laravel', 'REST APIs', 'MySQL', 'Docker', 'RAG / AI'].map(
+                {['Vue 3', 'TypeScript', 'Laravel', 'REST APIs', 'MySQL', 'Phaser', 'RAG / AI'].map(
                   (tag) => (
                     <span
                       key={tag}
@@ -593,23 +644,23 @@ const App = () => {
                     <div className="absolute z-[70] mt-2 w-full min-w-[240px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-2">
                       <a
                         href={cvFiles.en}
-                        download="alvaro_millan_fullstack_en_photo.docx"
+                        download="alvaro_millan_fullstack_en.pdf"
                         className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors"
                       >
                         <span>
                           <span className="block font-semibold text-white">English CV</span>
-                          <span className="block text-xs text-slate-400">Professional · DOCX</span>
+                          <span className="block text-xs text-slate-400">Professional · PDF</span>
                         </span>
                         <FileText size={18} className="text-cyan-300" />
                       </a>
                       <a
                         href={cvFiles.es}
-                        download="alvaro_millan_fullstack_es_photo.docx"
+                        download="alvaro_millan_fullstack_es.pdf"
                         className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors"
                       >
                         <span>
                           <span className="block font-semibold text-white">CV en español</span>
-                          <span className="block text-xs text-slate-400">Profesional · DOCX</span>
+                          <span className="block text-xs text-slate-400">Profesional · PDF</span>
                         </span>
                         <FileText size={18} className="text-violet-300" />
                       </a>
@@ -658,7 +709,7 @@ const App = () => {
                 <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/55 p-4 flex items-center gap-3">
                   <Globe2 size={19} className="text-cyan-300 shrink-0" />
                   <div>
-                    <div className="text-sm font-semibold text-white">Spain / Indonesia</div>
+                    <div className="text-sm font-semibold text-white">Mijas (Málaga), Spain</div>
                     <div className="text-xs text-slate-400">Remote · Spain / EU opportunities</div>
                   </div>
                 </div>
@@ -690,11 +741,16 @@ const App = () => {
                 I am a Full-Stack Developer and Software Engineer focused on building, debugging and
                 improving web applications, APIs and business-oriented software.
               </p>
-              <p className="text-slate-600 leading-relaxed mb-8">
+              <p className="text-slate-600 leading-relaxed mb-5">
                 My background combines software development with technical QA, business management
                 and practical product thinking. I enjoy understanding why a workflow exists, where
                 friction appears and how technology can turn that problem into a maintainable,
                 useful solution.
+              </p>
+              <p className="text-slate-600 leading-relaxed mb-8">
+                I work with AI-assisted and agentic development every day while owning the design,
+                code review, testing and delivery — most recently shipping Nusa: Warung Sort, a web
+                puzzle game I built and published as a solo developer.
               </p>
 
               <div className="grid sm:grid-cols-3 gap-4">
@@ -797,7 +853,8 @@ const App = () => {
             </div>
             <p className="text-slate-600 max-w-xl leading-relaxed">
               Strongest around Vue/TypeScript + Laravel/PHP, with API integration, data-driven
-              workflows, debugging, QA and applied AI as complementary strengths.
+              workflows, debugging, QA, applied AI and browser game development as complementary
+              strengths.
             </p>
           </div>
 
@@ -817,7 +874,7 @@ const App = () => {
             ))}
           </div>
 
-          <div className="reveal grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="reveal grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {capabilityGroups.map((group, index) => (
               <div
                 key={group.title}
@@ -861,8 +918,8 @@ const App = () => {
             <p className="section-kicker">Selected work</p>
             <h2 className="section-title text-slate-900">Projects that show how I build.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mt-5">
-              A focused selection covering product architecture, full-stack development and applied
-              AI — with Nusa Creator Studio first because it best represents my current direction.
+              A focused selection covering a published web game, product architecture, full-stack
+              development and applied AI — each one owned end to end, from design to delivery.
             </p>
           </div>
 
@@ -871,12 +928,12 @@ const App = () => {
               <article
                 key={project.title}
                 className={`reveal premium-card project-card group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-500 ${
-                  index === 0 ? 'lg:col-span-2' : ''
+                  project.featured ? 'lg:col-span-2' : ''
                 }`}
                 onMouseMove={handleCardPointerMove}
                 style={{ '--reveal-delay': `${index * 100}ms` }}
               >
-                <div className={`${index === 0 ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-[#020617]`}>
+                <div className={`${project.featured ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-[#020617]`}>
                   <img
                     src={project.image}
                     alt={project.title}
@@ -902,9 +959,30 @@ const App = () => {
 
                 </div>
 
+                {project.screenshots && (
+                  <div className="grid grid-cols-4 gap-2 px-6 sm:px-7 pt-5">
+                    {project.screenshots.map((screenshot, screenshotIndex) => (
+                      <button
+                        key={screenshot.src}
+                        type="button"
+                        onClick={() => setSelectedGallery({ project, index: screenshotIndex })}
+                        className="aspect-video rounded-xl overflow-hidden border border-slate-200 hover:border-blue-500 hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label={`Open screenshot: ${screenshot.caption}`}
+                      >
+                        <img
+                          src={screenshot.src}
+                          alt={screenshot.caption}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="p-6 sm:p-7">
                   <div className="mb-4">
-                    <h3 className={`${index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black text-slate-900`}>
+                    <h3 className={`${project.featured ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black text-slate-900`}>
                       {project.title}
                     </h3>
                     <p className="text-blue-700 font-semibold text-sm mt-1.5">{project.subtitle}</p>
@@ -944,6 +1022,18 @@ const App = () => {
                       </button>
                     )}
 
+                    {project.demo && (
+                      <a
+                        href={project.demo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                      >
+                        <Gamepad2 size={14} />
+                        {project.demoLabel || 'Live Demo'}
+                      </a>
+                    )}
+
                     {project.code && (
                       <a
                         href={project.code}
@@ -969,6 +1059,81 @@ const App = () => {
           </div>
         </div>
       </section>
+
+      {selectedGallery && (
+        <div
+          className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[80] p-4"
+          onClick={() => setSelectedGallery(null)}
+        >
+          <div
+            className="bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-5 border-b border-white/10">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300 mb-1">
+                  Screenshot {selectedGallery.index + 1} / {selectedGallery.project.screenshots.length}
+                </p>
+                <h3 className="text-lg font-bold text-white">{selectedGallery.project.title}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedGallery(null)}
+                className="text-slate-400 hover:text-white w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center"
+                aria-label="Close screenshot viewer"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="relative p-4 sm:p-5">
+              <img
+                src={selectedGallery.project.screenshots[selectedGallery.index].src}
+                alt={selectedGallery.project.screenshots[selectedGallery.index].caption}
+                className="w-full h-auto max-h-[68vh] object-contain rounded-2xl bg-black"
+              />
+
+              {[
+                { step: -1, icon: ChevronLeft, label: 'Previous screenshot', position: 'left-6 sm:left-8' },
+                { step: 1, icon: ChevronRight, label: 'Next screenshot', position: 'right-6 sm:right-8' }
+              ].map((control) => (
+                <button
+                  key={control.label}
+                  type="button"
+                  onClick={() =>
+                    setSelectedGallery((gallery) => {
+                      const total = gallery.project.screenshots.length;
+                      return { ...gallery, index: (gallery.index + control.step + total) % total };
+                    })
+                  }
+                  className={`absolute top-1/2 -translate-y-1/2 ${control.position} w-11 h-11 rounded-full bg-white/90 text-slate-900 hover:bg-cyan-100 flex items-center justify-center shadow-xl transition-colors`}
+                  aria-label={control.label}
+                >
+                  <control.icon size={22} />
+                </button>
+              ))}
+            </div>
+
+            <div className="p-5 border-t border-white/10 bg-white/[0.03] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <p className="text-sm text-slate-300">
+                {selectedGallery.project.screenshots[selectedGallery.index].caption}
+              </p>
+
+              {selectedGallery.project.demo && (
+                <a
+                  href={selectedGallery.project.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-300 hover:text-cyan-200 text-sm font-semibold flex items-center gap-2 whitespace-nowrap"
+                >
+                  <ExternalLink size={16} />
+                  {selectedGallery.project.demoLabel || 'Live Demo'}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedVideoProject && (
         <div
@@ -1048,7 +1213,7 @@ const App = () => {
                     info: 'linkedin.com/in/alvaro-millan-estevez-27b814375',
                     href: 'https://www.linkedin.com/in/alvaro-millan-estevez-27b814375'
                   },
-                  { icon: MapPin, title: 'Location', info: 'Indonesia / Spain · Remote', href: null }
+                  { icon: MapPin, title: 'Location', info: 'Mijas (Málaga), Spain · Remote', href: null }
                 ].map((contact) => (
                   <a
                     key={contact.title}
