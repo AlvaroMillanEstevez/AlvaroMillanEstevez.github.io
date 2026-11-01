@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 import {
   AlertCircle,
   ArrowRight,
@@ -53,9 +55,14 @@ const App = () => {
   const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
   const [selectedGallery, setSelectedGallery] = useState(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
   const [activeSection, setActiveSection] = useState('home');
+  const [navIndicator, setNavIndicator] = useState(null);
+  const [cvMenuOpensUp, setCvMenuOpensUp] = useState(false);
+
+  const lenisRef = useRef(null);
+  const cvMenuRef = useRef(null);
+  const timelineRef = useRef(null);
+  const navButtonRefs = useRef({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -101,20 +108,91 @@ const App = () => {
   }, [EMAILJS_CONFIG.PUBLIC_KEY]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = documentHeight > 0 ? (scrollTop / documentHeight) * 100 : 0;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
-      setScrollOffset(scrollTop);
+    const lenis = new Lenis({
+      autoRaf: true,
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+    });
+
+    lenisRef.current = lenis;
+
+    return () => {
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  // Scroll-linked effects write CSS variables instead of React state, so scrolling never re-renders the page.
+  useEffect(() => {
+    const root = document.documentElement;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const scrollTop = window.scrollY;
+      const documentHeight = root.scrollHeight - window.innerHeight;
+      const progress = documentHeight > 0 ? scrollTop / documentHeight : 0;
+      const heroProgress = Math.min(1, scrollTop / Math.max(1, window.innerHeight));
+
+      root.style.setProperty('--scroll-progress', Math.min(1, Math.max(0, progress)).toFixed(4));
+      root.style.setProperty('--hero-progress', heroProgress.toFixed(4));
+
+      const timeline = timelineRef.current;
+      if (timeline) {
+        const rect = timeline.getBoundingClientRect();
+        const timelineProgress = (window.innerHeight * 0.65 - rect.top) / Math.max(1, rect.height);
+        timeline.style.setProperty('--timeline-progress', Math.min(1, Math.max(0, timelineProgress)).toFixed(4));
+      }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    const requestUpdate = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    update();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
   }, []);
+
+  useEffect(() => {
+    const lenis = lenisRef.current;
+    if (!lenis) return;
+
+    if (selectedVideoProject || selectedGallery) lenis.stop();
+    else lenis.start();
+  }, [selectedVideoProject, selectedGallery]);
+
+  useEffect(() => {
+    if (!isCvMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (cvMenuRef.current && !cvMenuRef.current.contains(event.target)) {
+        setIsCvMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [isCvMenuOpen]);
+
+  useLayoutEffect(() => {
+    const updateIndicator = () => {
+      const button = navButtonRefs.current[activeSection];
+      if (button) setNavIndicator({ left: button.offsetLeft, width: button.offsetWidth });
+    };
+
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeSection]);
 
   useEffect(() => {
     const revealElements = document.querySelectorAll('.reveal');
@@ -197,8 +275,15 @@ const App = () => {
 
     if (element) {
       const headerOffset = window.innerWidth < 1024 ? 64 : 80;
+
       const targetTop =
         element.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(Math.max(0, targetTop), { duration: 1.4 });
+        setIsCvMenuOpen(false);
+        return;
+      }
 
       window.scrollTo({
         top: Math.max(0, targetTop),
@@ -402,6 +487,56 @@ const App = () => {
       ]
     },
     {
+      title: 'Nusa Creator Studio',
+      subtitle: 'Open-source AI content studio for social-commerce sellers and creators.',
+      status: 'Open source',
+      statusClass: 'bg-emerald-400/90 text-slate-900',
+      description:
+        'Turns a product brief, photos or raw footage into ready-to-use marketing content — campaign angles, hooks, scripts, captions, voiceovers, try-on images and short videos — inside one project workspace.',
+      highlights: [
+        'Laravel REST API + Vue 3 / TypeScript SPA with Sanctum cookie authentication',
+        'Queued generations with transactional, idempotent credits and automatic refunds',
+        'Six AI providers (OpenAI, Gemini, Veo, ElevenLabs, FASHN, Shotstack) behind adapters, mock-first',
+        'Plan-gated tools, private media library, admin panel and EN/ID/ES interface',
+        '360 backend + 232 frontend tests; agent-written code reviewed and tested by me'
+      ],
+      tech: ['Vue 3', 'TypeScript', 'Laravel', 'PostgreSQL', 'Pinia', 'Tailwind CSS', 'Queues', 'AI providers'],
+      code: 'https://github.com/AlvaroMillanEstevez/nusa-creator-studio',
+      image: 'assets/demoNusaCreatorStudio.png',
+      video: 'assets/videos/videoDemoNusaCreatorStudio.mp4',
+      screenshots: [
+        { src: 'assets/nusa-creator-studio-dashboard.png', caption: 'Dashboard with projects, credits and recent generations' },
+        { src: 'assets/nusa-creator-studio-project-actions.png', caption: 'Project workspace with plan-gated actions and credit costs' },
+        { src: 'assets/nusa-creator-studio-campaign-result.png', caption: 'Product Content Kit result: hooks and TikTok script (mock mode)' },
+        { src: 'assets/nusa-creator-studio-pricing.png', caption: 'Plans and credits priced in Indonesian Rupiah' }
+      ]
+    },
+    {
+      title: 'Warung Kita',
+      subtitle: 'Browser management game about running an Indonesian street restaurant.',
+      status: 'Work in progress',
+      statusClass: 'bg-amber-400/90 text-slate-900',
+      description:
+        'My second Phaser game: reopen and grow a small warung — cook nasi goreng, serve customers, buy supplies and reinvest in tables, staff and upgrades until it runs largely on its own.',
+      highlights: [
+        'Game rules in a Phaser-free simulation layer, covered by 124 rule tests',
+        'Staff AI: cooks batch towards a shared target and reserve resources so they never collide',
+        'Physical economy: supplier cash or credit, debt repaid from sales, cash tray to collect',
+        'Keyboard + touch-drag controls, versioned local save and ES/EN/ID localisation',
+        'All art drawn procedurally in code — no downloaded assets'
+      ],
+      tech: ['TypeScript', 'Phaser 4', 'Vite', 'node:test', 'Procedural art', 'Agentic AI'],
+      code: 'https://github.com/AlvaroMillanEstevez/warung-game',
+      image: 'assets/warung-kita-kitchen-and-dining.png',
+      video: 'assets/videos/warungKitaDemo.mp4',
+      screenshots: [
+        { src: 'assets/warung-kita-kitchen-and-dining.png', caption: 'Kitchen, counter and dining room with cooks, cashier and customers' },
+        { src: 'assets/warung-kita-dining-room-staff.png', caption: 'Dining room with cleaning staff' },
+        { src: 'assets/warung-kita-office-upgrades.png', caption: 'Office upgrades panel' },
+        { src: 'assets/warung-kita-mobile-counter.png', caption: 'Mobile portrait view with touch controls' }
+      ]
+    },
+    {
       title: 'AI / RAG Knowledge Assistant',
       subtitle: 'Document-grounded assistant with retrieval and source-aware responses.',
       status: 'Prototype',
@@ -418,25 +553,6 @@ const App = () => {
       code: 'https://github.com/AlvaroMillanEstevez/rag-chatbot-agent',
       image: 'assets/RAGChatbot.png',
       video: 'assets/videos/RagChatbotPorfolio.mp4'
-    },
-    {
-      title: 'Nusa Creator Studio',
-      subtitle: 'AI-powered SaaS for social-commerce content workflows.',
-      status: 'In development',
-      statusClass: 'bg-amber-400/90 text-slate-900',
-      featured: true,
-      description:
-        'Independent full-stack SaaS product built around AI-assisted content generation, structured workflows and subscription-style product rules.',
-      highlights: [
-        'Laravel REST API + Vue 3 / TypeScript frontend',
-        'Projects, generation history, credits and plan-based feature gating',
-        'Decoupled AI providers and dynamic prompts',
-        'API/frontend tests including ownership, credit rules and multilingual inputs'
-      ],
-      tech: ['Vue 3', 'TypeScript', 'Laravel', 'Pinia', 'Tailwind CSS', 'REST APIs', 'AI'],
-      code: null,
-      image: 'assets/demoNusaCreatorStudio.png',
-      video: 'assets/videos/videoDemoNusaCreatorStudio.mp4'
     },
     {
       title: 'E-commerce Admin Dashboard',
@@ -478,10 +594,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 selection:bg-cyan-300 selection:text-slate-900">
-      <div
-        className="fixed top-0 left-0 z-[70] h-[3px] bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-[width] duration-100"
-        style={{ width: `${scrollProgress}%` }}
-      />
+      <div className="scroll-progress-bar fixed top-0 left-0 right-0 z-[10000] h-[3px] bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500" />
 
       <header className="portfolio-fixed-header">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full">
@@ -529,15 +642,23 @@ const App = () => {
 
             {/* Desktop navigation. */}
             <div className="hidden lg:flex flex-1 justify-center">
-              <div className="flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-xl">
+              <div className="relative flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-xl">
+                {navIndicator && (
+                  <span
+                    aria-hidden="true"
+                    className="nav-indicator absolute top-1 bottom-1 left-0 rounded-full bg-white/10 shadow-inner shadow-white/5 ring-1 ring-white/10"
+                    style={{ width: navIndicator.width, transform: `translateX(${navIndicator.left}px)` }}
+                  />
+                )}
                 {navigationItems.map((item) => (
                   <button
                     key={item.id}
+                    ref={(element) => {
+                      navButtonRefs.current[item.id] = element;
+                    }}
                     onClick={() => scrollToSection(item.id)}
-                    className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ${
-                      activeSection === item.id
-                        ? 'text-white bg-white/10 shadow-inner shadow-white/5'
-                        : 'text-slate-300 hover:text-white hover:bg-white/[0.07]'
+                    className={`relative z-10 px-4 py-2 rounded-full text-sm transition-colors duration-300 ${
+                      activeSection === item.id ? 'text-white' : 'text-slate-300 hover:text-white'
                     }`}
                   >
                     {item.label}
@@ -570,17 +691,20 @@ const App = () => {
 
       <section
         id="home"
-        className="relative z-10 min-h-screen flex items-center overflow-x-hidden overflow-y-visible pt-24 lg:pt-24 pb-20"
+        className="relative z-30 min-h-screen flex items-center pt-24 lg:pt-24 pb-20"
       >
-        <div className="absolute inset-0 hero-grid opacity-30 pointer-events-none" />
-        <div className="absolute -top-40 -left-28 w-[34rem] h-[34rem] rounded-full bg-cyan-500/20 blur-[120px] animate-orbit-slow pointer-events-none" />
-        <div className="absolute top-1/3 -right-40 w-[38rem] h-[38rem] rounded-full bg-violet-600/20 blur-[140px] animate-orbit-reverse pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-[24rem] h-[24rem] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+        {/* Decorative layers are clipped here, not on the section, so the CV menu can overflow below it. */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute inset-0 hero-grid opacity-30" />
+          <div className="hero-parallax-slow absolute -top-40 -left-28 w-[34rem] h-[34rem] rounded-full bg-cyan-500/20 blur-[120px] animate-orbit-slow" />
+          <div className="hero-parallax-fast absolute top-1/3 -right-40 w-[38rem] h-[38rem] rounded-full bg-violet-600/20 blur-[140px] animate-orbit-reverse" />
+          <div className="hero-parallax-slow absolute bottom-0 left-1/3 w-[24rem] h-[24rem] rounded-full bg-blue-500/10 blur-[100px]" />
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="grid lg:grid-cols-[1.3fr_0.7fr] gap-12 lg:gap-16 items-center">
-            <div className="reveal">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200 mb-7">
+            <div className="hero-copy relative z-20">
+              <div className="hero-stagger inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200 mb-7">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -588,23 +712,27 @@ const App = () => {
                 Open to full-time Software Engineering opportunities
               </div>
 
-              <p className="text-cyan-300 uppercase tracking-[0.24em] text-xs sm:text-sm font-semibold mb-4">
+              <p className="hero-stagger text-cyan-300 uppercase tracking-[0.24em] text-xs sm:text-sm font-semibold mb-4" style={{ '--i': 1 }}>
                 Full-Stack Developer · Software Engineer
               </p>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5.3rem] font-black tracking-[-0.04em] leading-[0.96] text-white mb-7">
-                Building software that
-                <span className="block gradient-text">solves real problems.</span>
+                <span className="line-mask">
+                  <span className="line-inner" style={{ '--i': 0 }}>Building software that</span>
+                </span>
+                <span className="line-mask">
+                  <span className="line-inner gradient-text" style={{ '--i': 1 }}>solves real problems.</span>
+                </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-300 leading-relaxed max-w-3xl mb-8">
+              <p className="hero-stagger text-lg sm:text-xl text-slate-300 leading-relaxed max-w-3xl mb-8" style={{ '--i': 4 }}>
                 I build and improve web products with Vue, TypeScript, Laravel and REST APIs —
                 combining software development, technical QA, root-cause debugging and practical AI
                 integration with a strong understanding of business needs. I have also designed and
                 published my own web game with TypeScript and Phaser.
               </p>
 
-              <div className="flex flex-wrap gap-2.5 mb-9">
+              <div className="hero-stagger flex flex-wrap gap-2.5 mb-9" style={{ '--i': 5 }}>
                 {['Vue 3', 'TypeScript', 'Laravel', 'REST APIs', 'MySQL', 'Phaser', 'RAG / AI'].map(
                   (tag) => (
                     <span
@@ -617,20 +745,26 @@ const App = () => {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+              <div className="hero-stagger flex flex-col sm:flex-row flex-wrap gap-3" style={{ '--i': 6 }}>
                 <button
                   onClick={() => scrollToSection('experience')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-900 px-6 py-3.5 font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5 shadow-xl shadow-black/10"
+                  className="press group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-900 px-6 py-3.5 font-semibold hover:bg-cyan-100 transition-all hover:-translate-y-0.5 shadow-xl shadow-black/10"
                 >
                   View Experience
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <div className="relative">
+                <div className="relative" ref={cvMenuRef}>
                   <button
                     type="button"
-                    onClick={() => setIsCvMenuOpen((value) => !value)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500/10 border border-cyan-300/25 text-cyan-100 px-6 py-3.5 font-semibold hover:bg-cyan-400/15 transition-all hover:-translate-y-0.5"
+                    onClick={(event) => {
+                      const spaceBelow = window.innerHeight - event.currentTarget.getBoundingClientRect().bottom;
+                      setCvMenuOpensUp(spaceBelow < 190);
+                      setIsCvMenuOpen((value) => !value);
+                    }}
+                    aria-expanded={isCvMenuOpen}
+                    aria-haspopup="true"
+                    className="press w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500/10 border border-cyan-300/25 text-cyan-100 px-6 py-3.5 font-semibold hover:bg-cyan-400/15 transition-all hover:-translate-y-0.5"
                   >
                     <Download size={18} />
                     Download CV
@@ -640,8 +774,14 @@ const App = () => {
                     />
                   </button>
 
-                  {isCvMenuOpen && (
-                    <div className="absolute z-[70] mt-2 w-full min-w-[240px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-2">
+                  <div
+                    className={`cv-menu absolute left-0 z-[70] w-full ${
+                      cvMenuOpensUp ? 'bottom-full mb-2 opens-up' : 'top-full mt-2'
+                    } min-w-[260px] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-black/40 p-2 ${
+                      isCvMenuOpen ? 'is-open' : ''
+                    }`}
+                    inert={!isCvMenuOpen}
+                  >
                       <a
                         href={cvFiles.en}
                         download="alvaro_millan_fullstack_en.pdf"
@@ -664,15 +804,14 @@ const App = () => {
                         </span>
                         <FileText size={18} className="text-violet-300" />
                       </a>
-                    </div>
-                  )}
+                  </div>
                 </div>
 
                 <a
                   href="https://github.com/AlvaroMillanEstevez"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] text-white px-6 py-3.5 font-semibold hover:bg-white/10 transition-all hover:-translate-y-0.5"
+                  className="press inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] text-white px-6 py-3.5 font-semibold hover:bg-white/10 transition-all hover:-translate-y-0.5"
                 >
                   <Github size={18} />
                   GitHub
@@ -680,12 +819,11 @@ const App = () => {
               </div>
             </div>
 
-            <div className="reveal relative max-w-md mx-auto lg:max-w-none w-full">
+            <div className="hero-portrait relative z-10 max-w-md mx-auto lg:max-w-none w-full">
               <div className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-br from-cyan-400/30 via-blue-500/10 to-violet-500/30 blur-2xl scale-95" />
               <div
                 className="premium-card hero-portrait-card relative rounded-[2.25rem] border border-white/15 bg-white/[0.06] backdrop-blur-xl p-4 shadow-2xl transition-transform duration-200"
                 onMouseMove={handleCardPointerMove}
-                style={{ transform: `translate3d(0, ${Math.min(scrollOffset * 0.025, 18)}px, 0)` }}
               >
                 <div className="rounded-[1.75rem] overflow-hidden bg-slate-900 aspect-[4/5]">
                   <img
@@ -786,8 +924,9 @@ const App = () => {
             </p>
           </div>
 
-          <div className="relative">
-            <div className="absolute left-[21px] sm:left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-cyan-400/70 via-blue-500/40 to-transparent" />
+          <div className="relative" ref={timelineRef}>
+            <div className="absolute left-[21px] sm:left-[27px] top-4 bottom-4 w-px bg-white/[0.06]" />
+            <div className="timeline-line absolute left-[21px] sm:left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-cyan-400 via-blue-500 to-violet-500/40" />
 
             <div className="space-y-6">
               {experiences.map((experience, index) => (
@@ -796,7 +935,7 @@ const App = () => {
                   className="reveal relative pl-14 sm:pl-20"
                   style={{ '--reveal-delay': `${index * 90}ms` }}
                 >
-                  <div className="absolute left-0 top-5 w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-white/10 text-cyan-300 flex items-center justify-center shadow-xl">
+                  <div className="timeline-dot absolute left-0 top-5 w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-white/10 text-cyan-300 flex items-center justify-center shadow-xl">
                     <experience.icon size={21} />
                   </div>
 
@@ -827,10 +966,11 @@ const App = () => {
                     </ul>
 
                     <div className="flex flex-wrap gap-2">
-                      {experience.tech.map((tech) => (
+                      {experience.tech.map((tech, techIndex) => (
                         <span
                           key={tech}
-                          className="rounded-full bg-white/[0.06] border border-white/10 px-3 py-1.5 text-xs text-slate-300"
+                          style={{ '--i': techIndex }}
+                          className="chip rounded-full bg-white/[0.06] border border-white/10 px-3 py-1.5 text-xs text-slate-300"
                         >
                           {tech}
                         </span>
@@ -887,10 +1027,11 @@ const App = () => {
                 </div>
                 <h3 className="font-bold text-lg mb-4">{group.title}</h3>
                 <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => (
+                  {group.items.map((item, itemIndex) => (
                     <span
                       key={item}
-                      className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium"
+                      style={{ '--i': itemIndex }}
+                      className="chip px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium"
                     >
                       {item}
                     </span>
@@ -918,26 +1059,31 @@ const App = () => {
             <p className="section-kicker">Selected work</p>
             <h2 className="section-title text-slate-900">Projects that show how I build.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mt-5">
-              A focused selection covering a published web game, product architecture, full-stack
-              development and applied AI — each one owned end to end, from design to delivery.
+              Two browser games, an open-source AI product and full-stack work — each one owned end
+              to end, from idea and architecture to testing and delivery.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-2 gap-6">
             {projects.map((project, index) => (
               <article
                 key={project.title}
-                className={`reveal premium-card project-card group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-500 ${
-                  project.featured ? 'lg:col-span-2' : ''
+                className={`reveal premium-card project-card group rounded-[2rem] overflow-hidden border border-slate-200 bg-white shadow-sm transition-[box-shadow,transform] duration-500 ${
+                  project.featured ? 'lg:col-span-2 lg:grid lg:grid-cols-[1.2fr_1fr]' : 'flex flex-col'
                 }`}
                 onMouseMove={handleCardPointerMove}
-                style={{ '--reveal-delay': `${index * 100}ms` }}
+                style={{ '--reveal-delay': `${project.featured ? 0 : ((index - 1) % 2) * 120}ms` }}
               >
-                <div className={`${project.featured ? 'h-72 sm:h-96' : 'h-64'} relative overflow-hidden bg-[#020617]`}>
+                <div className={project.featured ? 'lg:flex lg:flex-col lg:pb-7' : ''}>
+                <div
+                  className={`project-media relative overflow-hidden bg-[#020617] ${
+                    project.featured ? 'h-72 sm:h-96 lg:h-auto lg:flex-1 lg:min-h-[24rem]' : 'h-64 sm:h-72'
+                  }`}
+                >
                   <img
                     src={project.image}
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="project-cover w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
                   <div className="absolute top-4 left-4">
@@ -966,7 +1112,8 @@ const App = () => {
                         key={screenshot.src}
                         type="button"
                         onClick={() => setSelectedGallery({ project, index: screenshotIndex })}
-                        className="aspect-video rounded-xl overflow-hidden border border-slate-200 hover:border-blue-500 hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        style={{ '--i': screenshotIndex }}
+                        className="chip aspect-video rounded-xl overflow-hidden border border-slate-200 hover:border-blue-500 hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label={`Open screenshot: ${screenshot.caption}`}
                       >
                         <img
@@ -979,8 +1126,9 @@ const App = () => {
                     ))}
                   </div>
                 )}
+                </div>
 
-                <div className="p-6 sm:p-7">
+                <div className={`p-6 sm:p-7 ${project.featured ? 'lg:py-10 lg:pr-10' : 'flex flex-col flex-1'}`}>
                   <div className="mb-4">
                     <h3 className={`${project.featured ? 'text-2xl sm:text-3xl' : 'text-xl'} font-black text-slate-900`}>
                       {project.title}
@@ -1000,22 +1148,23 @@ const App = () => {
                   </ul>
 
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {project.tech.map((tech) => (
+                    {project.tech.map((tech, techIndex) => (
                       <span
                         key={tech}
-                        className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-medium"
+                        style={{ '--i': techIndex }}
+                        className="chip bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-medium"
                       >
                         {tech}
                       </span>
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 mt-auto">
                     {project.video && (
                       <button
                         type="button"
                         onClick={() => setSelectedVideoProject(project)}
-                        className="inline-flex items-center gap-2 bg-[#020617] hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                        className="press inline-flex items-center gap-2 bg-[#020617] hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Play size={14} />
                         Video Demo
@@ -1027,7 +1176,7 @@ const App = () => {
                         href={project.demo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                        className="press inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Gamepad2 size={14} />
                         {project.demoLabel || 'Live Demo'}
@@ -1039,7 +1188,7 @@ const App = () => {
                         href={project.code}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                        className="press inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
                       >
                         <Github size={14} />
                         Code
@@ -1062,11 +1211,12 @@ const App = () => {
 
       {selectedGallery && (
         <div
-          className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[80] p-4"
+          className="modal-backdrop fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[10001] p-4"
           onClick={() => setSelectedGallery(null)}
+          data-lenis-prevent
         >
           <div
-            className="bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
+            className="modal-panel bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex justify-between items-center p-5 border-b border-white/10">
@@ -1088,9 +1238,10 @@ const App = () => {
 
             <div className="relative p-4 sm:p-5">
               <img
+                key={selectedGallery.index}
                 src={selectedGallery.project.screenshots[selectedGallery.index].src}
                 alt={selectedGallery.project.screenshots[selectedGallery.index].caption}
-                className="w-full h-auto max-h-[68vh] object-contain rounded-2xl bg-black"
+                className="gallery-image w-full h-auto max-h-[68vh] object-contain rounded-2xl bg-black"
               />
 
               {[
@@ -1137,11 +1288,12 @@ const App = () => {
 
       {selectedVideoProject && (
         <div
-          className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[80] p-4"
+          className="modal-backdrop fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-[10001] p-4"
           onClick={() => setSelectedVideoProject(null)}
+          data-lenis-prevent
         >
           <div
-            className="bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
+            className="modal-panel bg-slate-900 border border-white/10 rounded-[2rem] max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex justify-between items-center p-5 border-b border-white/10">
@@ -1357,6 +1509,12 @@ const App = () => {
       </footer>
 
       <style>{`
+        :root {
+          --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+          --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+          --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
         html {
           scroll-behavior: smooth;
         }
@@ -1500,21 +1658,257 @@ const App = () => {
           font-weight: 900;
         }
 
-        .reveal {
-          opacity: 0;
-          transform: translateY(28px) scale(0.992);
-          filter: blur(3px);
+        /* Progress bar and hero parallax read the CSS variables written on scroll. */
+        .scroll-progress-bar {
+          transform: scaleX(var(--scroll-progress, 0));
+          transform-origin: left center;
+          will-change: transform;
+        }
+
+        .nav-indicator {
           transition:
-            opacity 760ms cubic-bezier(0.22, 1, 0.36, 1),
-            transform 760ms cubic-bezier(0.22, 1, 0.36, 1),
-            filter 760ms cubic-bezier(0.22, 1, 0.36, 1);
-          transition-delay: var(--reveal-delay, 0ms);
+            transform 520ms var(--ease-out-expo),
+            width 520ms var(--ease-out-expo);
+        }
+
+        .hero-parallax-slow {
+          translate: 0 calc(var(--hero-progress, 0) * 140px);
+        }
+
+        .hero-parallax-fast {
+          translate: 0 calc(var(--hero-progress, 0) * -90px);
+        }
+
+        .hero-portrait {
+          animation: heroPortraitIn 1400ms var(--ease-out-expo) 380ms backwards;
+        }
+
+        @media (min-width: 1024px) {
+          .hero-copy {
+            translate: 0 calc(var(--hero-progress, 0) * 70px);
+            opacity: calc(1 - var(--hero-progress, 0) * 0.85);
+          }
+
+          .hero-portrait {
+            translate: 0 calc(var(--hero-progress, 0) * -50px);
+          }
+        }
+
+        .hero-stagger {
+          animation: heroIn 1100ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+        }
+
+        .line-mask {
+          display: block;
+          overflow: hidden;
+          padding-bottom: 0.08em;
+          margin-bottom: -0.08em;
+        }
+
+        .line-inner {
+          display: block;
+          animation: lineUp 1200ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--i, 0) * 110ms + 260ms);
+        }
+
+        @keyframes heroIn {
+          from {
+            opacity: 0;
+            transform: translateY(22px);
+            filter: blur(8px);
+          }
+        }
+
+        @keyframes lineUp {
+          from {
+            transform: translateY(105%) rotate(2deg);
+          }
+        }
+
+        @keyframes heroPortraitIn {
+          from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.94);
+            filter: blur(12px);
+          }
+        }
+
+        /*
+         * Scroll reveals use animations with backwards fill instead of transitions:
+         * the stagger delay only applies to the entrance, never to later hover transitions.
+         */
+        .reveal:not(.is-visible) {
+          opacity: 0;
         }
 
         .reveal.is-visible {
+          animation: revealIn 1000ms var(--ease-out-expo) backwards;
+          animation-delay: var(--reveal-delay, 0ms);
+        }
+
+        @keyframes revealIn {
+          from {
+            opacity: 0;
+            transform: translateY(36px) scale(0.985);
+            filter: blur(6px);
+          }
+        }
+
+        .reveal.is-visible .section-title {
+          animation: titleWipe 1200ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--reveal-delay, 0ms) + 90ms);
+        }
+
+        @keyframes titleWipe {
+          from {
+            clip-path: inset(0 0 100% 0);
+            transform: translateY(0.4em);
+          }
+          to {
+            clip-path: inset(-20% -5% -20% -5%);
+            transform: none;
+          }
+        }
+
+        .reveal.is-visible .section-kicker {
+          animation: kickerIn 900ms var(--ease-out-expo) backwards;
+          animation-delay: var(--reveal-delay, 0ms);
+        }
+
+        @keyframes kickerIn {
+          from {
+            opacity: 0;
+            letter-spacing: 0.5em;
+          }
+        }
+
+        .reveal:not(.is-visible) .chip {
+          opacity: 0;
+        }
+
+        .reveal.is-visible .chip {
+          animation: chipIn 700ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--reveal-delay, 0ms) + 260ms + var(--i, 0) * 40ms);
+        }
+
+        @keyframes chipIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.94);
+          }
+        }
+
+        .reveal.is-visible .project-media {
+          animation: mediaReveal 1300ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--reveal-delay, 0ms) + 100ms);
+        }
+
+        .reveal.is-visible .project-cover {
+          animation: coverZoom 1800ms var(--ease-out-expo) backwards;
+          animation-delay: calc(var(--reveal-delay, 0ms) + 100ms);
+        }
+
+        @keyframes mediaReveal {
+          from {
+            clip-path: inset(10% 7% 10% 7% round 28px);
+          }
+          to {
+            clip-path: inset(0 0 0 0 round 0);
+          }
+        }
+
+        @keyframes coverZoom {
+          from {
+            scale: 1.18;
+          }
+        }
+
+        .timeline-line {
+          transform: scaleY(var(--timeline-progress, 0));
+          transform-origin: top center;
+          will-change: transform;
+          box-shadow: 0 0 18px rgba(34, 211, 238, 0.45);
+        }
+
+        .reveal.is-visible .timeline-dot {
+          animation: dotPop 800ms var(--ease-spring) backwards;
+          animation-delay: calc(var(--reveal-delay, 0ms) + 120ms);
+        }
+
+        @keyframes dotPop {
+          from {
+            opacity: 0;
+            transform: scale(0.5) rotate(-12deg);
+          }
+        }
+
+        /* Press feedback: quick, subtle and only on press. */
+        .press:active {
+          scale: 0.97;
+        }
+
+        .press {
+          transition-property: color, background-color, border-color, box-shadow, transform, scale;
+        }
+
+        .cv-menu {
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-6px) scale(0.96);
+          transform-origin: top center;
+          transition:
+            opacity 160ms ease-out,
+            transform 160ms ease-out,
+            visibility 0s linear 160ms;
+        }
+
+        .cv-menu.opens-up {
+          transform: translateY(6px) scale(0.96);
+          transform-origin: bottom center;
+        }
+
+        .cv-menu.is-open {
           opacity: 1;
-          transform: translateY(0) scale(1);
-          filter: blur(0);
+          visibility: visible;
+          transform: none;
+          transition:
+            opacity 220ms var(--ease-out-quart),
+            transform 260ms var(--ease-out-expo),
+            visibility 0s;
+        }
+
+        .modal-backdrop {
+          animation: backdropIn 280ms ease-out both;
+        }
+
+        .modal-panel {
+          animation: panelIn 520ms var(--ease-out-expo) both;
+        }
+
+        .gallery-image {
+          animation: galleryIn 420ms var(--ease-out-expo) both;
+        }
+
+        @keyframes backdropIn {
+          from {
+            opacity: 0;
+          }
+        }
+
+        @keyframes panelIn {
+          from {
+            opacity: 0;
+            transform: translateY(18px) scale(0.96);
+            filter: blur(6px);
+          }
+        }
+
+        @keyframes galleryIn {
+          from {
+            opacity: 0;
+            transform: scale(0.985);
+          }
         }
 
         .brand-logo > span:first-child {
@@ -1634,14 +2028,14 @@ const App = () => {
           animation: softFloat 7s ease-in-out infinite;
         }
 
-        .project-card img {
+        .project-card .project-cover {
           transition:
             transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
             filter 500ms ease;
         }
 
         @media (hover: hover) and (pointer: fine) {
-          .project-card:hover img {
+          .project-card:hover .project-cover {
             transform: scale(1.055);
             filter: saturate(1.04) contrast(1.02);
           }
@@ -1657,14 +2051,25 @@ const App = () => {
             transition-duration: 0.01ms !important;
           }
 
-          .reveal {
+          .reveal:not(.is-visible),
+          .reveal:not(.is-visible) .chip {
             opacity: 1;
-            transform: none;
-            filter: none;
           }
 
           .hero-portrait-card {
             animation: none;
+          }
+
+          .hero-copy,
+          .hero-portrait,
+          .hero-parallax-slow,
+          .hero-parallax-fast {
+            translate: none;
+            opacity: 1;
+          }
+
+          .timeline-line {
+            transform: none;
           }
 
           .premium-card,
