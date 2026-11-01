@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import emailjs from '@emailjs/browser';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import {
@@ -39,6 +40,56 @@ import {
 const getContactEmail = () =>
   [['alvaro', 'mye'].join(''), ['gmail', 'com'].join('.')].join(String.fromCharCode(64));
 
+const FORM_LIMITS = { name: 100, email: 254, subject: 150, message: 5000 };
+const MESSAGE_MIN_LENGTH = 10;
+const SEND_COOLDOWN_MS = 60 * 1000;
+const LAST_SENT_STORAGE_KEY = 'portfolio-contact-last-sent';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const readLastSentAt = () => {
+  try {
+    return Number(window.localStorage.getItem(LAST_SENT_STORAGE_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+const storeLastSentAt = (timestamp) => {
+  try {
+    window.localStorage.setItem(LAST_SENT_STORAGE_KEY, String(timestamp));
+  } catch {
+    // Storage can be unavailable (private mode); the in-memory value still applies.
+  }
+};
+
+const validateContactForm = (data) => {
+  const values = {
+    name: data.name.trim(),
+    email: data.email.trim(),
+    subject: data.subject.trim(),
+    message: data.message.trim()
+  };
+
+  if (!values.name || !values.email || !values.subject || !values.message) {
+    return { error: 'Please fill in all the fields.' };
+  }
+
+  const tooLong = Object.keys(FORM_LIMITS).find((field) => values[field].length > FORM_LIMITS[field]);
+  if (tooLong) {
+    return { error: `The ${tooLong} field is too long (max ${FORM_LIMITS[tooLong]} characters).` };
+  }
+
+  if (!EMAIL_PATTERN.test(values.email)) {
+    return { error: 'Please enter a valid email address.' };
+  }
+
+  if (values.message.length < MESSAGE_MIN_LENGTH) {
+    return { error: `Your message needs at least ${MESSAGE_MIN_LENGTH} characters.` };
+  }
+
+  return { values };
+};
+
 const navigationItems = [
     { label: 'Home', id: 'home' },
     { label: 'About', id: 'about' },
@@ -78,6 +129,9 @@ const App = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [formError, setFormError] = useState('');
+  const [honeypot, setHoneypot] = useState('');
+  const lastSentAtRef = useRef(0);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
 
   const EMAILJS_CONFIG = {
@@ -90,28 +144,6 @@ const App = () => {
     en: '/assets/alvaro_millan_fullstack_en.pdf',
     es: '/assets/alvaro_millan_fullstack_es.pdf'
   };
-
-  useEffect(() => {
-    if (!EMAILJS_CONFIG.PUBLIC_KEY) return;
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-    script.async = true;
-
-    script.onload = () => {
-      if (window.emailjs) {
-        window.emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
-      }
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, [EMAILJS_CONFIG.PUBLIC_KEY]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
@@ -347,19 +379,41 @@ const App = () => {
     EMAILJS_CONFIG.TEMPLATE_ID &&
     EMAILJS_CONFIG.PUBLIC_KEY;
 
+  const showFormError = (message) => {
+    setFormError(message);
+    setSubmitStatus('error');
+    setTimeout(() => setSubmitStatus(null), 5000);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
 
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      setSubmitStatus('error');
+    // Hidden honeypot field: people never see it, so anything in it comes from a bot. Nothing is sent.
+    if (honeypot) {
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setSubmitStatus('success');
       setTimeout(() => setSubmitStatus(null), 5000);
       return;
     }
 
-    if (!isEmailJsConfigured || !window.emailjs) {
-      const mailtoSubject = encodeURIComponent(formData.subject);
+    const { values, error } = validateContactForm(formData);
+    if (error) {
+      showFormError(error);
+      return;
+    }
+
+    const lastSentAt = Math.max(lastSentAtRef.current, readLastSentAt());
+    const waitMs = lastSentAt + SEND_COOLDOWN_MS - Date.now();
+    if (waitMs > 0) {
+      showFormError(`Please wait ${Math.ceil(waitMs / 1000)} seconds before sending another message.`);
+      return;
+    }
+
+    if (!isEmailJsConfigured) {
+      const mailtoSubject = encodeURIComponent(values.subject);
       const mailtoBody = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+        `Name: ${values.name}\nEmail: ${values.email}\n\n${values.message}`
       );
 
       window.location.href = `mailto:${getContactEmail()}?subject=${mailtoSubject}&body=${mailtoBody}`;
@@ -369,25 +423,25 @@ const App = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await window.emailjs.send(
-        EMAILJS_CONFIG.SERVICE_ID,
-        EMAILJS_CONFIG.TEMPLATE_ID,
-        {
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message
-        }
-      );
+      const result = await emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, values, {
+        publicKey: EMAILJS_CONFIG.PUBLIC_KEY,
+        blockHeadless: true,
+        limitRate: { id: 'portfolio-contact', throttle: SEND_COOLDOWN_MS }
+      });
 
       if (result.status !== 200) {
         throw new Error('EmailJS did not return a successful status.');
       }
 
+      const sentAt = Date.now();
+      lastSentAtRef.current = sentAt;
+      storeLastSentAt(sentAt);
+
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch (error) {
-      console.error('Error sending email:', error);
+    } catch (sendError) {
+      console.error('Error sending email:', sendError);
+      setFormError('The message could not be sent. Please try again later or reach me on LinkedIn.');
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -1454,17 +1508,31 @@ const App = () => {
                   ) : (
                     <>
                       <AlertCircle size={20} />
-                      <span>Please check the fields and try again.</span>
+                      <span>{formError || 'Please check the fields and try again.'}</span>
                     </>
                   )}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="relative space-y-4" noValidate>
+                <div className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden" aria-hidden="true">
+                  <label>
+                    Website
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(event) => setHoneypot(event.target.value)}
+                    />
+                  </label>
+                </div>
+
                 {[
-                  { name: 'name', type: 'text', placeholder: 'Your name *' },
-                  { name: 'email', type: 'email', placeholder: 'Your email *' },
-                  { name: 'subject', type: 'text', placeholder: 'Subject *' }
+                  { name: 'name', type: 'text', placeholder: 'Your name *', autoComplete: 'name' },
+                  { name: 'email', type: 'email', placeholder: 'Your email *', autoComplete: 'email' },
+                  { name: 'subject', type: 'text', placeholder: 'Subject *', autoComplete: 'off' }
                 ].map((field) => (
                   <input
                     key={field.name}
@@ -1473,6 +1541,9 @@ const App = () => {
                     value={formData[field.name]}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
+                    autoComplete={field.autoComplete}
+                    maxLength={FORM_LIMITS[field.name]}
+                    aria-label={field.placeholder.replace(' *', '')}
                     required
                     className="w-full p-4 bg-slate-900/55 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all"
                   />
@@ -1483,7 +1554,10 @@ const App = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   placeholder="Your message *"
+                  aria-label="Your message"
                   rows={6}
+                  minLength={MESSAGE_MIN_LENGTH}
+                  maxLength={FORM_LIMITS.message}
                   required
                   className="w-full p-4 bg-slate-900/55 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-4 focus:ring-cyan-400/5 transition-all resize-y"
                 />
