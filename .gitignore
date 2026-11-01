@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# environment files (EmailJS values are injected in CI from repository variables)
+.env
+.env*
+!.env.example
