@@ -4,7 +4,6 @@
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-alvaromillanestevez.github.io-blue?style=for-the-badge&logo=github)](https://alvaromillanestevez.github.io)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/alvaro-millan-estevez-27b814375)
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail)](mailto:[eliminado])
 
 **Full Stack Developer | Laravel · Vue · React · APIs · AI Integrations**
 
@@ -255,7 +254,6 @@ Vite • Webpack • Composer • npm/yarn • Postman • Figma • Agile/Scrum
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-Visit_Website-4FC08D?style=for-the-badge&logo=vue.js)](https://alvaromillanestevez.github.io)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/alvaro-millan-estevez-27b814375)
-[![Email](https://img.shields.io/badge/Email-Get_In_Touch-D14836?style=for-the-badge&logo=gmail)](mailto:[eliminado])
 
 ### 📞 **Quick Response Guarantee**
 *I respond to all inquiries within 24 hours*

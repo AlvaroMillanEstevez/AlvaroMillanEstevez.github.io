@@ -6,11 +6,13 @@ import {
   ArrowRight,
   Bot,
   Briefcase,
+  Check,
   CheckCircle,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Code2,
+  Copy,
   Database,
   Download,
   ExternalLink,
@@ -21,7 +23,6 @@ import {
   Linkedin,
   Mail,
   MapPin,
-  Phone,
   Play,
   Send,
   Server,
@@ -33,6 +34,10 @@ import {
   X,
   Zap
 } from 'lucide-react';
+
+// The address is assembled at runtime so it never appears as plain text in the HTML or the bundle.
+const getContactEmail = () =>
+  [['alvaro', 'mye'].join(''), ['gmail', 'com'].join('.')].join(String.fromCharCode(64));
 
 const navigationItems = [
     { label: 'Home', id: 'home' },
@@ -73,6 +78,7 @@ const App = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [isEmailCopied, setIsEmailCopied] = useState(false);
 
   const EMAILJS_CONFIG = {
     SERVICE_ID: process.env.REACT_APP_EMAILJS_SERVICE_ID,
@@ -315,6 +321,27 @@ const App = () => {
     }));
   };
 
+  const handleCopyEmail = async () => {
+    const email = getContactEmail();
+
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      const helper = document.createElement('textarea');
+      helper.value = email;
+      helper.setAttribute('readonly', '');
+      helper.style.position = 'fixed';
+      helper.style.opacity = '0';
+      document.body.appendChild(helper);
+      helper.select();
+      document.execCommand('copy');
+      document.body.removeChild(helper);
+    }
+
+    setIsEmailCopied(true);
+    setTimeout(() => setIsEmailCopied(false), 2200);
+  };
+
   const isEmailJsConfigured =
     EMAILJS_CONFIG.SERVICE_ID &&
     EMAILJS_CONFIG.TEMPLATE_ID &&
@@ -335,7 +362,7 @@ const App = () => {
         `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
       );
 
-      window.location.href = `mailto:[eliminado]?subject=${mailtoSubject}&body=${mailtoBody}`;
+      window.location.href = `mailto:${getContactEmail()}?subject=${mailtoSubject}&body=${mailtoBody}`;
       return;
     }
 
@@ -1356,9 +1383,28 @@ const App = () => {
               </p>
 
               <div className="space-y-3 mt-8">
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="press w-full text-left flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.07] hover:border-white/20 transition-all"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.06] text-cyan-300 flex items-center justify-center shrink-0">
+                    <Mail size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs text-slate-500">Email</div>
+                    <div className="text-sm text-slate-200" aria-live="polite">
+                      {isEmailCopied ? 'Copied to clipboard' : 'Copy email address'}
+                    </div>
+                  </div>
+                  {isEmailCopied ? (
+                    <Check size={18} className="text-emerald-400 shrink-0" />
+                  ) : (
+                    <Copy size={18} className="text-slate-400 shrink-0" />
+                  )}
+                </button>
+
                 {[
-                  { icon: Mail, title: 'Email', info: '[eliminado]', href: 'mailto:[eliminado]' },
-                  { icon: Phone, title: 'Phone / WhatsApp', info: '[eliminado]', href: 'tel:[eliminado]' },
                   {
                     icon: Linkedin,
                     title: 'LinkedIn',
@@ -1497,13 +1543,15 @@ const App = () => {
             >
               <Linkedin size={18} />
             </a>
-            <a
-              href="mailto:[eliminado]"
+            <button
+              type="button"
+              onClick={handleCopyEmail}
               className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"
-              aria-label="Email"
+              aria-label="Copy email address"
+              title={isEmailCopied ? 'Copied' : 'Copy email address'}
             >
-              <Mail size={18} />
-            </a>
+              {isEmailCopied ? <Check size={18} className="text-emerald-400" /> : <Mail size={18} />}
+            </button>
           </div>
         </div>
       </footer>
