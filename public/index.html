@@ -4,6 +4,17 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      GitHub Pages cannot send custom headers, so the security policy lives here.
+      Only same-origin scripts run (the runtime chunk is not inlined, see the build script);
+      inline styles are needed for React style attributes and the component <style> block.
+      External: devicon images from jsDelivr and the EmailJS API for the contact form.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cdn.jsdelivr.net; font-src 'self'; media-src 'self'; connect-src 'self' https://api.emailjs.com; manifest-src 'self'; worker-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
