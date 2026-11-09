@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
+import PlayableAdsPage from './PlayableAdsPage';
 import {
   AlertCircle,
   ArrowRight,
@@ -90,12 +91,16 @@ const validateContactForm = (data) => {
   return { values };
 };
 
+const PLAYABLE_ADS_PATH = '/playable-ads';
+const PLAYABLE_ADS_URL = `${PLAYABLE_ADS_PATH}/`;
+
 const navigationItems = [
     { label: 'Home', id: 'home' },
     { label: 'About', id: 'about' },
     { label: 'Experience', id: 'experience' },
     { label: 'Skills', id: 'skills' },
     { label: 'Projects', id: 'projects' },
+    { label: 'Playable Ads', id: 'playable-ads', href: PLAYABLE_ADS_URL },
     { label: 'Contact', id: 'contact' }
   ];
 
@@ -104,14 +109,17 @@ const navigationItems = [
     { label: 'Experience', id: 'experience' },
     { label: 'Skills', id: 'skills' },
     { label: 'Projects', id: 'projects' },
+    { label: 'Ads', ariaLabel: 'Playable Ads', id: 'playable-ads', href: PLAYABLE_ADS_URL },
     { label: 'Contact', id: 'contact' }
   ];
 
 const App = () => {
+  const isPlayableAdsRoute = window.location.pathname.replace(/\/+$/, '') === PLAYABLE_ADS_PATH;
+
   const [isCvMenuOpen, setIsCvMenuOpen] = useState(false);
   const [selectedVideoProject, setSelectedVideoProject] = useState(null);
   const [selectedGallery, setSelectedGallery] = useState(null);
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState(isPlayableAdsRoute ? 'playable-ads' : 'home');
   const [navIndicator, setNavIndicator] = useState(null);
   const [cvMenuOpensUp, setCvMenuOpensUp] = useState(false);
 
@@ -150,6 +158,7 @@ const App = () => {
 
     const lenis = new Lenis({
       autoRaf: true,
+      anchors: true,
       duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
     });
@@ -285,6 +294,16 @@ const App = () => {
     return () => sectionObserver.disconnect();
   }, []);
 
+  // Links back from the playable ads page arrive as /#section.
+  useEffect(() => {
+    const sectionId = window.location.hash.slice(1);
+    if (!sectionId || isPlayableAdsRoute) return undefined;
+
+    const timer = setTimeout(() => scrollToSection(sectionId), 150);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -310,6 +329,11 @@ const App = () => {
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
+
+    if (!element && isPlayableAdsRoute) {
+      window.location.assign(`/#${sectionId}`);
+      return;
+    }
 
     if (element) {
       const headerOffset = window.innerWidth < 1024 ? 64 : 80;
@@ -703,10 +727,14 @@ const App = () => {
             {/* Mobile/tablet: the logo is Home; the remaining sections fit on one row. */}
             <div className="lg:hidden flex-1 min-w-0">
               <div className="mobile-primary-nav flex items-center justify-start gap-0.5">
-                {mobileNavigationItems.map((item) => (
-                  <button
+                {mobileNavigationItems.map((item) => {
+                  const NavItem = item.href ? 'a' : 'button';
+
+                  return (
+                  <NavItem
                     key={item.id}
-                    onClick={() => scrollToSection(item.id)}
+                    href={item.href}
+                    onClick={item.href ? undefined : () => scrollToSection(item.id)}
                     aria-label={item.ariaLabel || item.label}
                     title={item.ariaLabel || item.label}
                     className={`mobile-nav-button min-w-0 px-1.5 py-1.5 rounded-lg text-[9px] min-[360px]:text-[10px] min-[390px]:text-[11px] sm:text-xs font-semibold tracking-[-0.01em] transition-all duration-300 ${
@@ -716,8 +744,9 @@ const App = () => {
                     }`}
                   >
                     {item.label}
-                  </button>
-                ))}
+                  </NavItem>
+                  );
+                })}
               </div>
             </div>
 
@@ -731,20 +760,25 @@ const App = () => {
                     style={{ width: navIndicator.width, transform: `translateX(${navIndicator.left}px)` }}
                   />
                 )}
-                {navigationItems.map((item) => (
-                  <button
+                {navigationItems.map((item) => {
+                  const NavItem = item.href ? 'a' : 'button';
+
+                  return (
+                  <NavItem
                     key={item.id}
+                    href={item.href}
                     ref={(element) => {
                       navButtonRefs.current[item.id] = element;
                     }}
-                    onClick={() => scrollToSection(item.id)}
+                    onClick={item.href ? undefined : () => scrollToSection(item.id)}
                     className={`relative z-10 px-4 py-2 rounded-full text-sm transition-colors duration-300 ${
                       activeSection === item.id ? 'text-white' : 'text-slate-300 hover:text-white'
                     }`}
                   >
                     {item.label}
-                  </button>
-                ))}
+                  </NavItem>
+                  );
+                })}
               </div>
             </div>
 
@@ -770,6 +804,16 @@ const App = () => {
         </div>
       </header>
 
+      {isPlayableAdsRoute && (
+        <PlayableAdsPage
+          isEmailCopied={isEmailCopied}
+          onCopyEmail={handleCopyEmail}
+          onCardPointerMove={handleCardPointerMove}
+        />
+      )}
+
+      {!isPlayableAdsRoute && (
+      <>
       <section
         id="home"
         className="relative z-30 min-h-screen flex items-center pt-24 lg:pt-24 pb-20"
@@ -1588,6 +1632,9 @@ const App = () => {
           </div>
         </div>
       </section>
+
+      </>
+      )}
 
       <footer className="bg-black text-white border-t border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">

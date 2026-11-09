@@ -31,6 +31,7 @@ const validValues = {
 beforeEach(() => {
   emailjs.send.mockReset();
   window.localStorage.clear();
+  window.history.pushState({}, '', '/');
 });
 
 test('renders the hero heading', () => {
@@ -62,4 +63,36 @@ test('limits fields to their maximum length', () => {
   render(<App />);
   expect(document.querySelector('[name="name"]')).toHaveAttribute('maxLength', '100');
   expect(document.querySelector('[name="message"]')).toHaveAttribute('maxLength', '5000');
+});
+
+describe('playable ads page', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/playable-ads/');
+  });
+
+  test('renders the service page instead of the home sections', () => {
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/playable ads/i);
+    expect(document.getElementById('experience')).toBeNull();
+  });
+
+  test('embeds both demos in sandboxed frames without same-origin access', () => {
+    render(<App />);
+    const frames = document.querySelectorAll('iframe');
+    expect(frames).toHaveLength(2);
+    frames.forEach((frame) => expect(frame.getAttribute('sandbox')).toBe('allow-scripts'));
+  });
+
+  test('shows no public prices and states the current limitations', () => {
+    const { container } = render(<App />);
+    expect(container.textContent).not.toMatch(/€|\bEUR\b/);
+    expect(screen.getAllByText(/contact for quote/i)).toHaveLength(3);
+    expect(container.textContent).toMatch(/no ads in live campaigns and no conversion data/i);
+  });
+
+  test('exposes no email address or mail link', () => {
+    const { container } = render(<App />);
+    expect(container.innerHTML).not.toMatch(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
+    expect(container.querySelector('a[href^="mailto:"], a[href^="tel:"]')).toBeNull();
+  });
 });
