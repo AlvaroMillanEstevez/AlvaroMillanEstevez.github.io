@@ -6,8 +6,8 @@ import {
   Clock,
   Copy,
   ExternalLink,
-  FileText,
   Github,
+  Languages,
   Layers,
   Linkedin,
   Mail,
@@ -138,12 +138,12 @@ const reasons = [
   {
     icon: Clock,
     title: 'European time zone',
-    text: 'CET working hours and professional English, so feedback does not wait a day.'
+    text: 'CET working hours, so feedback does not wait a day.'
   },
   {
-    icon: FileText,
-    title: 'Invoiced from Spain',
-    text: 'Straightforward invoicing from Spain for studios and agencies.'
+    icon: Languages,
+    title: 'Professional English',
+    text: 'Clear written communication throughout the project, from the brief to the final builds.'
   }
 ];
 
