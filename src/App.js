@@ -632,6 +632,8 @@ const App = () => {
       ],
       tech: ['TypeScript', 'Phaser 4', 'Vite', 'node:test', 'Procedural art', 'Agentic AI'],
       code: 'https://github.com/AlvaroMillanEstevez/warung-game',
+      demo: 'https://alvaromillanestevez.github.io/phaser-playable-kit/',
+      demoLabel: 'Try the playable ad',
       image: 'assets/warung-kita-kitchen-and-dining.png',
       video: 'assets/videos/warungKitaDemo.mp4',
       screenshots: [
@@ -640,6 +642,29 @@ const App = () => {
         { src: 'assets/warung-kita-office-upgrades.png', caption: 'Office upgrades panel' },
         { src: 'assets/warung-kita-mobile-counter.png', caption: 'Mobile portrait view with touch controls' }
       ]
+    },
+    {
+      title: 'phaser-playable-kit',
+      subtitle: 'Open source kit: write a playable ad once, export it for each ad network.',
+      status: 'Open source · v0.1.0',
+      statusClass: 'bg-emerald-400/90 text-slate-900',
+      featured: true,
+      description:
+        'Builds playable ads for mobile games with Phaser 4 and produces a network-ready file for each ad network, checked against that network’s size and format rules. In active development.',
+      highlights: [
+        'One small adapter per network: AppLovin, Unity Ads, Google and Meta supported; Moloco and Liftoff in testing',
+        'Size budget and static validator on every build',
+        'Offline by design: everything inlined, no runtime requests, no personal data',
+        '147 unit tests and a headless Chromium smoke test across 18 builds, all in CI',
+        'Built with AI coding tools under my direction; not yet tested on physical phones or in the networks’ preview tools'
+      ],
+      tech: ['Phaser 4', 'TypeScript', 'Vite', 'Vitest', 'GitHub Actions', 'Agentic AI'],
+      code: 'https://github.com/AlvaroMillanEstevez/phaser-playable-kit',
+      demo: 'https://alvaromillanestevez.github.io/phaser-playable-kit/',
+      demoLabel: 'Open the live demo',
+      service: PLAYABLE_ADS_URL,
+      serviceLabel: 'Playable ads service',
+      image: 'assets/phaser-playable-kit-demo.webp'
     },
     {
       title: 'AI / RAG Knowledge Assistant',
@@ -836,6 +861,14 @@ const App = () => {
                 </span>
                 Open to full-time Software Engineering opportunities
               </div>
+
+              <a
+                href={PLAYABLE_ADS_URL}
+                className="hero-stagger group inline-flex items-center gap-1.5 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-400/15 transition-colors mb-7 sm:ml-2"
+              >
+                Also: playable ads for mobile games
+                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              </a>
 
               <p className="hero-stagger text-cyan-300 uppercase tracking-[0.24em] text-xs sm:text-sm font-semibold mb-4" style={{ '--i': 1 }}>
                 Full-Stack Developer · Software Engineer
@@ -1184,8 +1217,8 @@ const App = () => {
             <p className="section-kicker">Selected work</p>
             <h2 className="section-title text-slate-900">Projects that show how I build.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mt-5">
-              Two browser games, an open-source AI product and full-stack work — each one owned end
-              to end, from idea and architecture to testing and delivery.
+              Two browser games, an open-source playable ads kit, an AI product and full-stack work — each
+              one owned end to end, from idea and architecture to testing and delivery.
             </p>
           </div>
 
@@ -1197,7 +1230,7 @@ const App = () => {
                   project.featured ? 'lg:col-span-2 lg:grid lg:grid-cols-[1.2fr_1fr]' : 'flex flex-col'
                 }`}
                 onMouseMove={handleCardPointerMove}
-                style={{ '--reveal-delay': `${project.featured ? 0 : ((index - 1) % 2) * 120}ms` }}
+                style={{ '--reveal-delay': `${project.featured ? 0 : ((index - 1) % 3) * 120}ms` }}
               >
                 <div className={project.featured ? 'lg:flex lg:flex-col lg:pb-7' : ''}>
                 <div
@@ -1305,6 +1338,16 @@ const App = () => {
                       >
                         <Gamepad2 size={14} />
                         {project.demoLabel || 'Live Demo'}
+                      </a>
+                    )}
+
+                    {project.service && (
+                      <a
+                        href={project.service}
+                        className="press inline-flex items-center gap-2 border border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 py-2.5 px-4 rounded-xl transition-all font-semibold text-sm"
+                      >
+                        {project.serviceLabel}
+                        <ArrowRight size={14} />
                       </a>
                     )}
 
